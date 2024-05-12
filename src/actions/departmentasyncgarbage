@@ -1,0 +1,253 @@
+export const fetchAllAction = () => {
+    return async (dispatch) => {
+
+        axios({
+            method: 'get',
+            url: API_URI + "/Department/fetch",
+            timeout: 4000,    // 4 seconds timeout
+            headers: {
+                'token': `Bearer ${authToken}`,
+            },
+            // data: {
+            //     firstName: 'David',
+            //     lastName: 'Pollock'
+            // }
+        })
+        .then(response => {
+            dispatch({
+                status: 'SUCCESS',
+                scope: "DEPARTMENT",
+                type: "FETCHALL",
+                factorySite: data
+            });
+        })
+        .catch(error => {
+            dispatch({
+                status: 'FAILURE',
+                scope: "DEPARTMENT",
+                type: "FETCHALL",
+                error: error.message
+            })
+        })
+    };
+
+}
+
+export const fetchOne = (id) =>
+    return async (dispatch) => {
+        const authToken = localStorage.getItem('authToken')
+        axios({
+            method: 'get',
+            url: API_URI + "/Department/fetch",
+            timeout: 4000,    // 4 seconds timeout
+            headers: {
+                'token': `Bearer ${authToken}`,
+            },
+            params: {
+                id: id,
+            }
+        })
+        .then(response => {
+            dispatch({
+                status: 'SUCCESS',
+                scope: "DEPARTMENT",
+                type: "FETCHONE",
+                factorySite: data
+            });
+        })
+        .catch(error => {
+            dispatch({
+                status: 'FAILURE',
+                scope: "DEPARTMENT",
+                type: "FETCHONE",
+                error: error.message
+            })
+        })
+    };
+
+
+
+export const create = (factorysite) =>
+    return async (dispatch) => {
+        const authToken = localStorage.getItem('authToken')
+        axios({
+            method: 'post',
+            url: API_URI + "/Department/create",
+            timeout: 4000,    // 4 seconds timeout
+            headers: {
+                'token': `Bearer ${authToken}`,
+            },
+             data: {
+                factorysite: factorysite
+             }
+        })
+        .then(response => {
+            dispatch({
+                status: 'SUCCESS',
+                scope: "DEPARTMENT",
+                type: "CREATE"
+            });
+        })
+        .catch(error => {
+            dispatch({
+                status: 'FAILURE',
+                scope: "DEPARTMENT",
+                type: "CREATE",
+                error: error.message
+            })
+        })
+    };
+
+
+
+export const update = (factorysite) =>
+    return async (dispatch) => {
+        const authToken = localStorage.getItem('authToken')
+        axios({
+            method: 'post',
+            url: API_URI + "/Department/update",
+            timeout: 4000,    // 4 seconds timeout
+            headers: {
+                'token': `Bearer ${authToken}`,
+            },
+             data: {
+                factorysite: factorysite
+             }
+        })
+        .then(response => {
+            dispatch({
+                status: 'SUCCESS',
+                scope: "DEPARTMENT",
+                type: "UPDATE"
+            });
+        })
+        .catch(error => {
+            dispatch({
+                status: 'FAILURE',
+                scope: "DEPARTMENT",
+                type: "UPDATE",
+                error: error.message
+            })
+        })
+    };
+
+
+
+export const delete = (factorysite) =>
+    return async (dispatch) => {
+        const authToken = localStorage.getItem('authToken')
+        axios({
+            method: 'post',
+            url: API_URI + "/Department/delete",
+            timeout: 4000,    // 4 seconds timeout
+            headers: {
+                'token': `Bearer ${authToken}`,
+            },
+             data: {
+                id: factorysite.id
+             }
+        })
+        .then(response => {
+            dispatch({
+                method : "SYNC"
+                status: 'SUCCESS',
+                scope: "DEPARTMENT",
+                type: "DELETE"
+            });
+        })
+        .catch(error => {
+            dispatch({
+                status: 'FAILURE',
+                scope: "DEPARTMENT",
+                type: "DELETE",
+                error: error.message
+            })
+        })
+    };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import {ASYNC, CREATE, DELETE, WAREHOUSE, FETCHALL, FETCHONE, SYNC, UPDATE} from "./actions.js";
+
+export const fetchAllWarehousesAction = () => ({
+    scope: WAREHOUSE,
+    type: ASYNC,
+    action: FETCHALL
+});
+
+export const fetchOneWarehouseAction = (id) => ({
+    scope: WAREHOUSE,
+    type: ASYNC,
+    action: FETCHONE,
+    id: id
+});
+
+export const createWarehouseAction = (warehouse) => ({
+    scope: WAREHOUSE,
+    type: ASYNC,
+    action: CREATE,
+    warehouse: warehouse
+});
+
+export const updateWarehouseAction = (warehouse) => ({
+    scope: WAREHOUSE,
+    type: ASYNC,
+    action: UPDATE,
+    warehouse: warehouse
+});
+
+export const deleteWarehouseAction = (warehouse) => ({
+    scope: WAREHOUSE,
+    type: ASYNC,
+    action: DELETE,
+    warehouse: warehouse
+});
+
+
+//SYNC
+export const onFetchWarehouseAction = (warehouses) => ({
+    scope: WAREHOUSE,
+    type: SYNC,
+    action: FETCHALL,
+    warehouses: warehouses
+});
+
+
+export const onCreateWarehouseAction = (warehouse) => ({
+    scope: WAREHOUSE,
+    type: SYNC,
+    action: CREATE,
+    warehouse: warehouse
+});
+
+export const onUpdateWarehouseAction = (warehouse) => ({
+    scope: WAREHOUSE,
+    type: SYNC,
+    action: UPDATE,
+    warehouse: warehouse
+});
+
+export const onDeleteWarehouseAction = (warehouse) => ({
+    scope: WAREHOUSE,
+    type: SYNC,
+    action: DELETE,
+    warehouse: warehouse
+});
+
+
+
+
+
+
+
