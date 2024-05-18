@@ -12,7 +12,11 @@ export const DELETE = "DELETE";
 export const DEPARTMENT = "DEPARTMENT";
 export const FACTORYSITE = "FACTORYSITE";
 export const WAREHOUSE = "WAREHOUSE";
-
+export const PRODUCT = "PRODUCT";
+export const ITEM = "ITEM";
+export const GROUP = "GROUP";
+export const USER = "USER";
+export const REPORT = "REPORT";
 
 export const ERROR = "ERROR";
 export const OK = "OK";

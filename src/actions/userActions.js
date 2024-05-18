@@ -12,7 +12,7 @@ import {
 } from "./actions.js";
 import { UserBuilder } from "../builders/userBuilder.js";
 
-export const fetchAllUserAction = () => {
+export const fetchAllUsersAction = () => {
     return async (dispatch) => {
         try {
             const authToken = localStorage.getItem('authToken');

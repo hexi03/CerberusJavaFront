@@ -10,7 +10,9 @@ import { FactorySites } from "./components/FactorySites.js";
 import { Departments } from "./components/Departments.js";
 import { WareHouses } from "./components/WareHouses.js";
 import { LeftMenu } from './components/LeftMenu.js';
-import { RegistriesPanel } from './components/RegistriesPanel.js'; // Импортируем новый компонент
+import { RegistriesPanel } from './components/Registries.js';
+import { ReportManagementPanel } from './components/Reports.js';
+import { UserGroupManagementPanel } from './components/UserGroup.js';
 
 const App = () => (
   <>

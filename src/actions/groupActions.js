@@ -12,7 +12,7 @@ import {
 } from "./actions.js";
 import { GroupBuilder } from "../builders/groupBuilder.js";
 
-export const fetchAllGroupAction = () => {
+export const fetchAllGroupsAction = () => {
     return async (dispatch) => {
         try {
             const authToken = localStorage.getItem('authToken');

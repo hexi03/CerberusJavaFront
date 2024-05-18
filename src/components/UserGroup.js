@@ -1,19 +1,37 @@
-import React, { useEffect } from 'react';
-import { Form, Button, Table } from 'react-bootstrap';
+import {useNavigate, useParams} from "react-router";
+
+import React, {useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
-import { navigate } from 'react-router-dom';
-import { createNewUserAction, fetchOneUserAction, updateUserAction, fetchAllUsersAction } from '../actions/userActions';
-import { createNewGroupAction, fetchOneGroupAction, updateGroupAction, fetchAllGroupsAction } from '../actions/groupActions';
+import {Link, useSearchParams} from "react-router-dom";
+import { Container, Form, Button, Row, Col, ListGroup, Table} from 'react-bootstrap';
+import { createUserAction, fetchOneUserAction, updateUserAction, fetchAllUsersAction } from '../actions/userActions.js';
+import { createGroupAction, fetchOneGroupAction, updateGroupAction, fetchAllGroupsAction } from '../actions/groupActions.js';
 
-const UserGroupManagementPanel = () => {
+export const UserGroupManagementPanel = () => {
   const { register, handleSubmit } = useForm();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
+
+  const {operation, name} = useParams();
+    const [queryParameters] = useSearchParams();
+    const id = queryParameters.get("id");
+
+
+    let content;
+    console.log("operation:");
+    console.log(operation);
+
+    console.log("name:");
+    console.log(name);
+
+    console.log(id);
+
   // Рендер формы для создания нового пользователя
-  const renderUserCreateForm = () => {
+  const RenderUserCreateForm = () => {
     const onSubmit = (data) => {
-      dispatch(createNewUserAction(data));
+      dispatch(createUserAction(data));
       navigate(-1);
     };
 
@@ -29,7 +47,7 @@ const UserGroupManagementPanel = () => {
   };
 
   // Рендер формы для обновления информации о пользователе
-  const renderUserUpdateForm = () => {
+  const RenderUserUpdateForm = () => {
     // Здесь вы можете использовать useParams() для получения id пользователя из URL
     // Пока примерно:
     const userId = 123; // Ваш ID пользователя
@@ -56,7 +74,7 @@ const UserGroupManagementPanel = () => {
   };
 
   // Рендер списка пользователей
-  const renderUserList = () => {
+  const RenderUserList = () => {
     useEffect(() => {
       dispatch(fetchAllUsersAction());
     }, [dispatch]);
@@ -82,9 +100,9 @@ const UserGroupManagementPanel = () => {
   };
 
   // Рендер формы для создания новой группы
-  const renderGroupCreateForm = () => {
+  const RenderGroupCreateForm = () => {
     const onSubmit = (data) => {
-      dispatch(createNewGroupAction(data));
+      dispatch(createGroupAction(data));
       navigate(-1);
     };
 
@@ -100,7 +118,7 @@ const UserGroupManagementPanel = () => {
   };
 
   // Рендер формы для обновления информации о группе
-  const renderGroupUpdateForm = () => {
+  const RenderGroupUpdateForm = () => {
     // Здесь вы можете использовать useParams() для получения id группы из URL
     // Пока примерно:
     const groupId = 456; // Ваш ID группы
@@ -127,7 +145,7 @@ const UserGroupManagementPanel = () => {
   };
 
   // Рендер списка групп
-  const renderGroupList = () => {
+  const RenderGroupList = () => {
     useEffect(() => {
       dispatch(fetchAllGroupsAction());
     }, [dispatch]);
@@ -152,17 +170,49 @@ const UserGroupManagementPanel = () => {
     );
   };
 
-  return (
-    <>
-      <h2>User Management</h2>
-      {renderUserCreateForm()}
-      {renderUserUpdateForm()}
-      {renderUserList()}
-
-      <h2>Group Management</h2>
-      {renderGroupCreateForm()}
-      {renderGroupUpdateForm()}
-      {renderGroupList()}
-    </>
-  );
+switch (name) {
+  case 'user':
+    switch (operation) {
+          case 'index':
+              content = RenderUserList();
+              break;
+          case 'details':
+              content = RenderUserDetails();
+              break;
+          case 'create':
+              content = RenderUserCreateForm();
+              break;
+          case 'update':
+              content = RenderUserUpdateForm();
+              break;
+          case 'delete':
+              content = RenderUserDeleteForm();
+              break;
+          default:
+              content = <div>Invalid operation</div>;
+              break;
+    }
+    break;
+  case 'group':
+            switch (operation) {
+          case 'index':
+              content = RenderGroupList();
+              break;
+          case 'details':
+              content = RenderGroupDetails();
+              break;
+          case 'create':
+              content = RenderGroupCreateForm();
+              break;
+          case 'update':
+              content = RenderGroupUpdateForm();
+              break;
+          case 'delete':
+              content = RenderGroupDeleteForm();
+              break;
+          default:
+              content = <div>Invalid operation</div>;
+              break;
+      }
+  }
 };

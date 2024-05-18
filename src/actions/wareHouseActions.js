@@ -48,7 +48,7 @@ return async (dispatch) => {
             id: id,
         })
     })
-        .then(response => dispatch(onFetchOneWareHouseAction(response.data[0])))
+        .then(response => dispatch(fetchOneWareHouseAction(response.data[0])))
         .catch(error => {
             console.log(error)
             if (error.response && error.response.status === 404){
