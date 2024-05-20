@@ -11,101 +11,106 @@ import {
     UPDATE
 } from "./actions.js";
 import { GroupBuilder } from "../builders/groupBuilder.js";
-
+import { updateToken } from "./authActions.js";
 export const fetchAllGroupsAction = () => {
-    return async (dispatch) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            const response = await axios.get(API_URI + "/group/fetch", {
-                crossDomain: true,
-                headers: {
-                    'Authorization': `Bearer ${authToken}`
-                }
-            });
+    return (dispatch) => {
+        const authToken = localStorage.getItem('authToken');
+        axios.get(API_URI + "/usergroup/fetchGroup", {
+            crossDomain: true,
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        })
+        .then(response => {
             dispatch(onFetchAllGroupAction(response.data));
-        } catch (error) {
+        })
+        .catch(error => {
             dispatch(onErrorAction(error.message));
-        }
+        }).finally(_ => updateToken());
     };
 }
 
 export const fetchOneGroupAction = (id) => {
-    return async (dispatch) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            const response = await axios.get(API_URI + "/group/fetch", {
-                crossDomain: true,
-                headers: {
-                    'Authorization': `Bearer ${authToken}`
-                },
-                params: { id }
-            });
+    return (dispatch) => {
+        const authToken = localStorage.getItem('authToken');
+        axios.get(API_URI + "/usergroup/fetchGroup", {
+            crossDomain: true,
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            },
+            params: { id }
+        })
+        .then(response => {
             if (response.data.length === 0) {
                 dispatch(onFetchOneNotFoundGroupAction(id));
             } else {
                 dispatch(onFetchOneGroupAction(response.data[0]));
             }
-        } catch (error) {
+        })
+        .catch(error => {
             dispatch(onErrorAction(error.message));
-        }
+        }).finally(_ => updateToken());
     }
 }
 
 export const createGroupAction = (group) => {
-    return async (dispatch) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            const response = await axios.post(API_URI + "/group/create", {
-                name: group.name
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Origin': API_ORIGIN
-                }
-            });
+    return (dispatch) => {
+        const authToken = localStorage.getItem('authToken');
+        axios.post(API_URI + "/usergroup/addGroup", {
+            name: group.name
+        }, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Origin': API_ORIGIN
+            }
+        })
+        .then(response => {
             group.id = response.data;
             dispatch(onCreateGroupAction(group));
-        } catch (error) {
+        })
+        .catch(error => {
             dispatch(onErrorAction(error.message));
-        }
+        }).finally(_ => updateToken());
     }
 }
 
 export const updateGroupAction = (group) => {
-    return async (dispatch) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            await axios.put(API_URI + "/group/update", {
-                id: group.id,
-                name: group.name
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Origin': API_ORIGIN
-                }
-            });
+    return (dispatch) => {
+        const authToken = localStorage.getItem('authToken');
+        axios.put(API_URI + "/usergroup/updateGroup", {
+            id: group.id,
+            name: group.name
+        }, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Origin': API_ORIGIN
+            }
+        })
+        .then(() => {
             dispatch(onUpdateGroupAction(group));
-        } catch (error) {
+        })
+        .catch(error => {
             dispatch(onErrorAction(error.message));
-        }
+        }).finally(_ => updateToken());
     }
 }
 
 export const deleteGroupAction = (group) => {
-    return async (dispatch) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            await axios.delete(API_URI + "/group/delete", {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Origin': API_ORIGIN
-                },
-                params: { id: group.id }
-            });
+    return (dispatch) => {
+        const authToken = localStorage.getItem('authToken');
+        axios.delete(API_URI + "/usergroup/removeGroup", {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Origin': API_ORIGIN
+            },
+            params: { id: group.id }
+        })
+        .then(() => {
             dispatch(onDeleteGroupAction(group.id));
-        } catch (error) {
+        })
+        .catch(error => {
             dispatch(onErrorAction(error.message));
-        }
+        }).finally(_ => updateToken());
     }
 }
 
@@ -114,7 +119,7 @@ export const onFetchAllGroupAction = (groups) => ({
     scope: 'GROUP',
     action: FETCHALL,
     type: OK,
-    groups: groups.map(group => (new GroupBuilder()).setId(group.id).setName(group.name).build())
+    groups: groups.map(group => (new GroupBuilder()).setId(group.id.id).setName(group.name).build())
 });
 
 export const onFetchOneGroupAction = (group) => ({

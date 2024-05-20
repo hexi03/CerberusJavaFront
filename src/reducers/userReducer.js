@@ -5,11 +5,12 @@ const initialState = {
 };
 //ALARM switch inheritance
 export const userReducer = (state = initialState, action) => {
+  console.log(action);
   if (action.scope === USER) {
     console.log(action);
     switch (action.action) {
       case FETCHALL:
-        state = {...state, users: action.users };
+        state = {...state, users: action.users.reduce((dictionary,index) => {dictionary[index.id] = index; return dictionary} , {}) };
         break;
       case FETCHONE:
       case UPDATE:

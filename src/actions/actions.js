@@ -18,6 +18,10 @@ export const GROUP = "GROUP";
 export const USER = "USER";
 export const REPORT = "REPORT";
 
+
+export const FACTORYSITESTATE = "FACTORYSITESTATE";
+export const WAREHOUSESTATE = "WAREHOUSESTATE";
+
 export const ERROR = "ERROR";
 export const OK = "OK";
 

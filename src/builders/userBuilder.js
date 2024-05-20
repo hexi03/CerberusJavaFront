@@ -4,7 +4,7 @@ export class UserBuilder {
        this.name = null;
        this.password = null;
        this.id = null;
-       this.groups = null;
+       this.groupIds = null;
     }
     setName(name){
         this.name = name;
@@ -16,8 +16,8 @@ export class UserBuilder {
         return this;
     }
 
-    setGroups(groups){
-        this.groups = groups;
+    setGroupIds(groupIds){
+        this.groupIds = groupIds;
         return this;
     }
 
@@ -31,7 +31,7 @@ export class UserBuilder {
             id: this.id,
             name: this.name,
             password: this.password,
-            groups: this.groups
+            groupIds: this.groupIds
         };
     }
 }

@@ -1,4 +1,4 @@
-import {ReportType} from "reportTypes.js";
+import {ReportType} from "./reportTypes.js";
  export class ReportBuilder {
 
     constructor() {
@@ -21,7 +21,8 @@ import {ReportType} from "reportTypes.js";
             case ReportType.FS_WORKSHIFT:
                 return new WorkShiftReportSubBuilder();
             default:
-                throw new Error("Invalid report type");
+                console.log("Invalid report type: " + type);
+                throw new Error("Invalid report type: " + type);
         }
     }
 
@@ -32,26 +33,36 @@ class GenericReportSubBuilder{
         this.id = null;
         this.createdAt = null;
         this.deletedAt = null;
+        this.creatorId = null;
 
     }
 
     setId(id){
         this.id = id;
+        return this;
+    }
+
+    setCreatorId(creatorId){
+        this.creatorId = creatorId;
+        return this;
     }
 
     setCreatedAt(createdAt){
         this.createdAt = createdAt;
+        return this;
     }
 
     setDeletedAt(deletedAt){
         this.deletedAt = deletedAt;
+        return this;
     }
 
     build(){
         return {
             id: this.id,
             deletedAt: this.deletedAt,
-            createdAt: this.createdAt
+            createdAt: this.createdAt,
+            creatorId :this.creatorId
         };
     }
 }
@@ -63,14 +74,16 @@ class WareHouseGenericReportSubBuilder extends GenericReportSubBuilder{
         this.wareHouseId = null;
     }
 
-    setId(wareHouseId){
+    setWareHouseId(wareHouseId){
         this.wareHouseId = wareHouseId;
+        return this;
     }
 
     build(){
         const base = super.build();
         return {
             ...base,
+            type: ReportType.WH_GENERIC,
             wareHouseId: this.wareHouseId
         };
     }
@@ -83,14 +96,17 @@ class FactorySiteGenericReportSubBuilder extends GenericReportSubBuilder{
         this.factorySiteId = null;
     }
 
-    setId(factorySiteId){
+    setFactorySiteId(factorySiteId){
+        console.log("setFactorySiteId");
         this.factorySiteId = factorySiteId;
+        return this;
     }
 
     build(){
         const base = super.build();
         return {
             ...base,
+            type: ReportType.FS_GENERIC,
             factorySiteId: this.factorySiteId
         };
     }
@@ -106,12 +122,14 @@ class InventarisationReportSubBuilder extends WareHouseGenericReportSubBuilder{
 
     setItems(items){
         this.items = items;
+        return this;
     }
 
     build(){
         const base = super.build();
         return {
             ...base,
+            type: ReportType.WH_INVENTARISATION,
             items: this.items
         };
     }
@@ -127,18 +145,21 @@ class ReleaseReportSubBuilder extends WareHouseGenericReportSubBuilder{
         this.supReqReportId = null;
     }
 
-    setWSReportId(supReqReportId){
+    setSupReqReportId(supReqReportId){
         this.supReqReportId = supReqReportId;
+        return this;
     }
 
     setItems(items){
         this.items = items;
+        return this;
     }
 
     build(){
         const base = super.build();
         return {
             ...base,
+            type: ReportType.WH_RELEASE,
             items: this.items,
             supReqReportId: this.supReqReportId
         };
@@ -153,12 +174,14 @@ class ReplenishmentReportSubBuilder extends WareHouseGenericReportSubBuilder{
 
     setItems(items){
         this.items = items;
+        return this;
     }
 
     build(){
         const base = super.build();
         return {
             ...base,
+            type: ReportType.WH_REPLENISHMENT,
             items: this.items
         };
     }
@@ -174,20 +197,24 @@ class WSReplenishmentReportSubBuilder extends WareHouseGenericReportSubBuilder{
 
     setWSReportId(workShiftReportId){
         this.workShiftReportId = workShiftReportId;
+        return this;
     }
 
     setItems(items){
         this.items = items;
+        return this;
     }
 
     setUnclaimedRemains(items){
         this.unclaimedRemains = items;
+        return this;
     }
 
     build(){
         const base = super.build();
         return {
             ...base,
+            type: ReportType.WH_WS_REPLENISHMENT,
             items: this.items,
             unclaimedRemains: this.unclaimedRemains,
             workShiftReportId: this.workShiftReportId
@@ -203,12 +230,14 @@ class ShipmentReportSubBuilder extends WareHouseGenericReportSubBuilder{
 
     setItems(items){
         this.items = items;
+        return this;
     }
 
     build(){
         const base = super.build();
         return {
             ...base,
+            type: ReportType.WH_SHIPMENT,
             items: this.items
         };
     }
@@ -225,26 +254,31 @@ class WorkShiftReportSubBuilder extends FactorySiteGenericReportSubBuilder{
     }
 
 
-    setSetTargetWareHouseIds(targetWareHouseIds){
+    setTargetWareHouseIds(targetWareHouseIds){
         this.targetWareHouseIds = targetWareHouseIds;
+        return this;
     }
 
-    setItems(produced){
+    setProducedItems(produced){
         this.produced = produced;
+        return this;
     }
 
     setLosses(losses){
         this.losses = losses;
+        return this;
     }
 
     setRemains(remains){
         this.remains = remains;
+        return this;
     }
 
     build(){
         const base = super.build();
         return {
             ...base,
+            type: ReportType.FS_WORKSHIFT,
             targetWareHouseIds: this.targetWareHouseIds,
             produced: this.produced,
             losses: this.losses,
@@ -260,18 +294,23 @@ class SupplyRequirementReportSubBuilder extends FactorySiteGenericReportSubBuild
         this.items = null;
     }
 
-    setSetTargetWareHouseIds(targetWareHouseIds){
+    setTargetWareHouseIds(targetWareHouseIds){
+        console.log("setTargetWareHouseIds");
         this.targetWareHouseIds = targetWareHouseIds;
+        return this;
     }
 
     setItems(items){
+        console.log("setItems");
         this.items = items;
+        return this;
     }
 
     build(){
         const base = super.build();
         return {
             ...base,
+            type: ReportType.FS_SUP_REQ,
             targetWareHouseIds: this.targetWareHouseIds,
             items: this.items
         };

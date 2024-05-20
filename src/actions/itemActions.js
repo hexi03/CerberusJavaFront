@@ -11,110 +11,115 @@ import {
     UPDATE
 } from "./actions.js";
 import { ItemBuilder } from "../builders/itemBuilder.js";
-
-export const fetchAllItemAction = () => {
-    return async (dispatch) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            const response = await axios.get(API_URI + "/item/fetch", {
-                crossDomain: true,
-                headers: {
-                    'Authorization': `Bearer ${authToken}`
-                }
-            });
-            dispatch(onFetchAllItemAction(response.data));
-        } catch (error) {
+import { updateToken } from "./authActions.js";
+export const fetchAllItemsAction = () => {
+    return (dispatch) => {
+        const authToken = localStorage.getItem('authToken');
+        axios.get(API_URI + "/registry/fetchItem", {
+            crossDomain: true,
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        })
+        .then(response => {
+            dispatch(onFetchAllItemsAction(response.data));
+        })
+        .catch(error => {
             dispatch(onErrorAction(error.message));
-        }
+        }).finally(_ => updateToken());
     };
 }
 
 export const fetchOneItemAction = (id) => {
-    return async (dispatch) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            const response = await axios.get(API_URI + "/item/fetch", {
-                crossDomain: true,
-                headers: {
-                    'Authorization': `Bearer ${authToken}`
-                },
-                params: { id }
-            });
+    return (dispatch) => {
+        const authToken = localStorage.getItem('authToken');
+        axios.get(API_URI + "/registry/fetchItem", {
+            crossDomain: true,
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            },
+            params: { id }
+        })
+        .then(response => {
             if (response.data.length === 0) {
                 dispatch(onFetchOneNotFoundItemAction(id));
             } else {
                 dispatch(onFetchOneItemAction(response.data[0]));
             }
-        } catch (error) {
+        })
+        .catch(error => {
             dispatch(onErrorAction(error.message));
-        }
+        }).finally(_ => updateToken());
     }
 }
 
 export const createItemAction = (item) => {
-    return async (dispatch) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            const response = await axios.post(API_URI + "/item/create", {
-                name: item.name
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Origin': API_ORIGIN
-                }
-            });
+    return (dispatch) => {
+        const authToken = localStorage.getItem('authToken');
+        axios.post(API_URI + "/registry/add", {
+            name: item.name
+        }, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Origin': API_ORIGIN
+            }
+        })
+        .then(response => {
             item.id = response.data;
             dispatch(onCreateItemAction(item));
-        } catch (error) {
+        })
+        .catch(error => {
             dispatch(onErrorAction(error.message));
-        }
+        }).finally(_ => updateToken());
     }
 }
 
 export const updateItemAction = (item) => {
-    return async (dispatch) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            await axios.put(API_URI + "/item/update", {
-                id: item.id,
-                name: item.name
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Origin': API_ORIGIN
-                }
-            });
+    return (dispatch) => {
+        const authToken = localStorage.getItem('authToken');
+        axios.put(API_URI + "/registry/updateItem", {
+            id: item.id,
+            name: item.name
+        }, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Origin': API_ORIGIN
+            }
+        })
+        .then(() => {
             dispatch(onUpdateItemAction(item));
-        } catch (error) {
+        })
+        .catch(error => {
             dispatch(onErrorAction(error.message));
-        }
+        }).finally(_ => updateToken());
     }
 }
 
 export const deleteItemAction = (item) => {
-    return async (dispatch) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            await axios.delete(API_URI + "/item/delete", {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Origin': API_ORIGIN
-                },
-                params: { id: item.id }
-            });
+    return (dispatch) => {
+        const authToken = localStorage.getItem('authToken');
+        axios.delete(API_URI + "/registry/removeItem", {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Origin': API_ORIGIN
+            },
+            params: { id: item.id }
+        })
+        .then(() => {
             dispatch(onDeleteItemAction(item.id));
-        } catch (error) {
+        })
+        .catch(error => {
             dispatch(onErrorAction(error.message));
-        }
+        }).finally(_ => updateToken());
     }
 }
 
 // SYNC
-export const onFetchAllItemAction = (items) => ({
+export const onFetchAllItemsAction = (items) => ({
     scope: 'ITEM',
     action: FETCHALL,
     type: OK,
-    items: items.map(item => (new ItemBuilder()).setId(item.id).setName(item.name).build())
+    items: items.map(item => (new ItemBuilder()).setId(item.id.id).setName(item.name).build())
 });
 
 export const onFetchOneItemAction = (item) => ({

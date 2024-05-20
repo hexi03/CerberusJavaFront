@@ -11,10 +11,11 @@ import {
     UPDATE
 } from "./actions.js";
 import {DepartmentBuilder} from "../builders/departmentBuilder.js";
+import { updateToken } from "./authActions.js";
 
 export const fetchAllDepartmentAction = () => {
     return async (dispatch) => {
-        const authToken = localStorage.getItem('authToken')
+        var authToken = localStorage.getItem('authToken')
         axios({
             method: 'get',
             crossDomain: true,
@@ -27,14 +28,14 @@ export const fetchAllDepartmentAction = () => {
             .then(response => dispatch(onFetchAllDepartmentAction(response.data)))
             .catch(error => {
                 dispatch(onErrorAction(error.message))
-            })
+            }).finally(_ => updateToken())
     };
 
 }
 
 export const fetchOneDepartmentAction = (id) =>{
 return async (dispatch) => {
-    const authToken = localStorage.getItem('authToken')
+    var authToken = localStorage.getItem('authToken')
     axios({
         method: 'get',
         crossDomain: true,
@@ -48,14 +49,14 @@ return async (dispatch) => {
         })
     })
         .then(response => dispatch(onFetchOneDepartmentAction(response.data[0])))
-        .catch(error => {
+            .catch(error => {
             console.log(error)
             if (error.response && error.response.status === 404){
                 dispatch(onFetchOneNotFoundDepartmentAction(id))
             }else{
                 dispatch(onErrorAction(error.message))
             }
-        })
+        }).finally(_ => updateToken())
 }
 }
 
@@ -66,7 +67,7 @@ export const createDepartmentAction = (department) =>{
     console.log(department)
 return async (dispatch) => {
     console.log("createDepartmentAction inside")
-    const authToken = localStorage.getItem('authToken')
+    var authToken = localStorage.getItem('authToken')
     axios({
         method: 'post',
         url: API_URI + "/department/create",
@@ -80,16 +81,16 @@ return async (dispatch) => {
         }
     })
         .then(response => {department.id = response.data; dispatch(onCreateDepartmentAction(department))})
-        .catch(error => {
+            .catch(error => {
             dispatch(onErrorAction(error.message))
-        })
+        }).finally(_ => updateToken())
 }}
 
 
 
 export const updateDepartmentAction = (department) =>{
 return async (dispatch) => {
-    const authToken = localStorage.getItem('authToken')
+    var authToken = localStorage.getItem('authToken')
     axios({
         method: 'put',
         url: API_URI + "/department/update",
@@ -103,9 +104,9 @@ return async (dispatch) => {
             name : department.name
         }
     }).then(response => dispatch(onUpdateDepartmentAction(department)))
-        .catch(error => {
+            .catch(error => {
             dispatch(onErrorAction(error.message))
-        })
+        }).finally(_ => updateToken())
 
 }}
 
@@ -115,7 +116,7 @@ export const deleteDepartmentAction = (department) => {
 return async (dispatch) => {
     console.log("deleteDepartmentAction");
     console.log(department);
-    const authToken = localStorage.getItem('authToken')
+    var authToken = localStorage.getItem('authToken')
     axios({
         method: 'delete',
         url: API_URI + "/department/delete",
@@ -129,9 +130,9 @@ return async (dispatch) => {
         })
     })
         .then(response => dispatch(onDeleteDepartmentAction(department.id)))
-        .catch(error => {
+            .catch(error => {
             dispatch(onErrorAction(error.message))
-        })
+        }).finally(_ => updateToken())
 }}
 
 //SYNC

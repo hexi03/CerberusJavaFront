@@ -9,7 +9,7 @@ export const groupReducer = (state = initialState, action) => {
     console.log(action);
     switch (action.action) {
       case FETCHALL:
-        state = {...state, groups: action.groups };
+        state = {...state, groups: action.groups.reduce((dictionary,index) => {dictionary[index.id] = index; return dictionary} , {}) };
         break;
       case FETCHONE:
       case UPDATE:

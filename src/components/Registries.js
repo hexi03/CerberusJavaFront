@@ -11,7 +11,7 @@ import { Container, Form, Button, Row, Col, ListGroup, Modal, Table } from 'reac
 import {ItemBuilder} from "../builders/itemBuilder.js";
 import {ProductBuilder} from "../builders/productBuilder.js";
 
-import { createItemAction, fetchOneItemAction, updateItemAction, fetchAllItemAction } from '../actions/itemActions.js';
+import { createItemAction, fetchOneItemAction, updateItemAction, fetchAllItemsAction } from '../actions/itemActions.js';
 
 import { createProductAction, fetchOneProductAction, updateProductAction, fetchAllProductAction } from '../actions/productActions.js';
 
@@ -78,7 +78,7 @@ export const RegistriesPanel = (props) => {
 
             const RenderItemList = () => {
                 useEffect(() => {
-                    dispatch(fetchAllItemAction());
+                    dispatch(fetchAllItemsAction());
                 }, [dispatch]);
 
                 const items = useSelector(state => state.items);

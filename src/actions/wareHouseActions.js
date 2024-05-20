@@ -4,6 +4,7 @@ import {
     CREATE,
     DELETE,
     WAREHOUSE,
+    WAREHOUSESTATE,
     FETCHALL, OK,
     FETCHNOTFOUND,
     FETCHONE,
@@ -11,7 +12,8 @@ import {
     UPDATE
 } from "./actions.js";
 import {WareHouseBuilder} from "../builders/wareHouseBuilder.js";
-
+import { WareHouseStateBuilder } from "../builders/wareHouseStateBuilder.js";
+import { updateToken } from "./authActions.js";
 
 export const fetchAllWareHouseAction = () => {
     return async (dispatch) => {
@@ -28,36 +30,36 @@ export const fetchAllWareHouseAction = () => {
             .then(response => dispatch(onFetchAllWareHouseAction(response.data)))
             .catch(error => {
                 dispatch(onErrorAction(error.message))
-            })
+            }).finally(_ => updateToken())
     };
 
 }
 
 export const fetchOneWareHouseAction = (id) =>{
-return async (dispatch) => {
-    const authToken = localStorage.getItem('authToken')
-    axios({
-        method: 'get',
-        url: API_URI + "/warehouse/fetch",
-        timeout: 4000,    // 4 seconds timeout
-        headers: {
-            'Authorization': `Bearer ${authToken}`,
-            'Origin':API_ORIGIN
-        },
-        params: new URLSearchParams({
-            id: id,
+    return async (dispatch) => {
+        const authToken = localStorage.getItem('authToken')
+        axios({
+            method: 'get',
+            url: API_URI + "/warehouse/fetch",
+            timeout: 4000,    // 4 seconds timeout
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Origin':API_ORIGIN
+            },
+            params: new URLSearchParams({
+                id: id,
+            })
         })
-    })
-        .then(response => dispatch(fetchOneWareHouseAction(response.data[0])))
-        .catch(error => {
-            console.log(error)
-            if (error.response && error.response.status === 404){
-                dispatch(onFetchOneNotFoundWareHouseAction(id))
-            }else{
-                dispatch(onErrorAction(error.message))
-            }
-        })
-}
+            .then(response => dispatch(onFetchOneWareHouseAction(response.data[0])))
+            .catch(error => {
+                console.log(error)
+                if (error.response && error.response.status === 404){
+                    dispatch(onFetchOneNotFoundWareHouseAction(id))
+                }else{
+                    dispatch(onErrorAction(error.message))
+                }
+            }).finally(_ => updateToken())
+    }
 }
 
 
@@ -82,9 +84,9 @@ return async (dispatch) => {
         }
     })
         .then(response => {wareHouse.id = response.data; dispatch(onCreateWareHouseAction(wareHouse))})
-        .catch(error => {
+            .catch(error => {
             dispatch(onErrorAction(error.message))
-        })
+        }).finally(_ => updateToken())
 }}
 
 
@@ -106,9 +108,9 @@ return async (dispatch) => {
             name : wareHouse.name
         }
     }).then(response => dispatch(onUpdateWareHouseAction(wareHouse)))
-        .catch(error => {
+            .catch(error => {
             dispatch(onErrorAction(error.message))
-        })
+        }).finally(_ => updateToken())
 
 }}
 
@@ -132,10 +134,43 @@ return async (dispatch) => {
         })
     })
         .then(response => dispatch(onDeleteWareHouseAction(wareHouse.id)))
-        .catch(error => {
+            .catch(error => {
             dispatch(onErrorAction(error.message))
-        })
+        }).finally(_ => updateToken())
 }}
+
+export const fetchOneWareHouseStateAction = (id) =>{
+    console.log("вызван fetchOneWareHouseStateAction!!!!!!!!!!!!!!! с ID: " + id)
+    return async (dispatch) => {
+        const authToken = localStorage.getItem('authToken')
+        axios({
+            method: 'get',
+            url: API_URI + "/warehouse/getState",
+            timeout: 4000,    // 4 seconds timeout
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Origin':API_ORIGIN
+            },
+            params: new URLSearchParams({
+                id: id,
+            })
+        })
+            .then(response =>  {
+                console.log("щас будет Dispatch")
+                dispatch(onFetchOneWareHouseStateAction(id, response.data));
+                console.log("Dispatch выполнился")
+            })
+            .catch(error => {
+                console.log("АШИПКА СТОП 0000")
+                console.log(error)
+                if (error.response && error.response.status === 404){
+                    dispatch(onFetchOneNotFoundWareHouseStateAction(id))
+                }else{
+                    dispatch(onErrorAction(error.message))
+                }
+            }).finally(_ => updateToken())
+    }
+}
 
 //SYNC
 export const onFetchAllWareHouseAction = (wareHouses) => {return {
@@ -178,5 +213,25 @@ export const onDeleteWareHouseAction = (id) => ({
     scope: WAREHOUSE,
     action: DELETE,
     type: OK,
+    id: id.id
+});
+
+export const onFetchOneWareHouseStateAction = (id, whState) => {
+     console.log("Это с fetch whState");
+      console.log(whState);
+    const res = {
+    scope: WAREHOUSESTATE,
+    action: FETCHONE,
+    type: OK,
+    state: (new WareHouseStateBuilder()).setId(id).setStorageState(whState.items).setProblems(whState.problems).setWarnings(whState.warnings).build()
+};
+      return res;
+
+};
+
+export const onFetchOneNotFoundWareHouseStateAction = (id) => ({
+    scope: WAREHOUSESTATE,
+    type: OK,
+    action: FETCHNOTFOUND,
     id: id.id
 });

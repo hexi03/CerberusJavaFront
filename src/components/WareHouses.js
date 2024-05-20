@@ -1,17 +1,21 @@
 import {useNavigate, useParams} from "react-router";
 
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import {Link, useSearchParams} from "react-router-dom";
 import {
     createWareHouseAction, deleteWareHouseAction,
     fetchAllWareHouseAction, fetchOneWareHouseAction,
-    onDeleteWareHouseAction, updateWareHouseAction
+    fetchOneWareHouseStateAction,
+    updateWareHouseAction
 } from "../actions/wareHouseActions.js";
 import {WareHouseBuilder} from "../builders/wareHouseBuilder.js";
 
-import { Container, Form, Button, Row, Col, Accordion, Card, Pagination, Spinner } from 'react-bootstrap';
+import { Container, Form, Button, Row, Col, Accordion, Card, Pagination, Spinner, ListGroup } from 'react-bootstrap';
+import { fetchAllItemsAction } from "../actions/itemActions.js";
+import { ReportList } from "./Reports.js";
+import { ReportType } from "../builders/reportTypes.js";
 
 const itemsPerStorageListPage = 5;
 
@@ -201,9 +205,9 @@ const Details = (props) => {
       <h2>Форма просмотра деталей склада</h2>
       <hr />
 
-      <ul>
-        <li><b>Наименование: </b>{wareHouse.name}</li>
-      </ul>
+      <h4>
+        <b>Наименование: </b>{wareHouse.name}
+      </h4>
 
       <WareHouseState id={wareHouseId}/>
 
@@ -221,13 +225,21 @@ const WareHouseState = (props) => {
 
   useEffect(() => {
     dispatch(fetchOneWareHouseStateAction(wareHouseId));
+    dispatch(fetchAllItemsAction());
+
   }, [dispatch, wareHouseId]);
 
-  const wareHouse = useSelector(state => state.wareHouse.wareHouses[wareHouseId].state);
 
-  if (!wareHouse && !wareHouse.state) return <NotFound />;
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const wareHouseState = wareHouse.state;
+  const wareHouseState = useSelector(state => state.wareHouseState.states[wareHouseId]);
+
+  const items = useSelector(state => state.item.items);
+    console.log("Айтемы: ");
+  console.log(items);
+  if (!wareHouseState) {
+    return <NotFound />;
+  }
 
   const renderProblems = () => {
     if (!wareHouseState.problems || wareHouseState.problems.length === 0) {
@@ -264,44 +276,38 @@ const WareHouseState = (props) => {
   };
 
   const renderReports = () => {
-    if (!wareHouseState.reports || wareHouseState.reports.length === 0) {
-      return (<h4>Отчетов не найдено</h4>);
+
+    const queryParams = {
+      typeCriteria: ReportType.WH_GENERIC,
+      locationSpecificId: wareHouseState.id
     }
 
     return (
-      <div>
-        <h3>Список отчетов:</h3>
-
-          {wareHouseState.reports.map((report, index) => (
-            <Row>
-              <Col key={index}>
-                <Link to={{ pathname: "/Report/details", search: `?id=${wareHouses[id].id}` }}>
-                    {report.name}
-                </Link>{" "}
-              </Col>
-              <Col key={index}>
-                    {report.createdAt}
-              </Col>
-            </Row>
-          ))}
-
-      </div>
+      <Accordion defaultActiveKey="0">
+        <Accordion.Item eventKey="0">
+          <Accordion.Header>Список отчетов:</Accordion.Header>
+          <Accordion.Body>
+            <Card>
+              <ReportList queryParams = {queryParams}/>
+            </Card>
+        </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
     );
   };
 
+  const renderStorageState = () => {
 
 
-  const warehouseStorageState = () => {
-    const [currentPage, setCurrentPage] = useState(1);
-
-    const wareHouseStorageState = wareHouseState.storage;
-
-    // Вычисление индексов начала и конца текущей страницы
+    const wareHouseStorageState = wareHouseState.storageState;
+    console.log("Состояние хранилища: ")
+    console.log(wareHouseStorageState);
     const indexOfLastItem = currentPage * itemsPerStorageListPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerStorageListPage;
-    const currentItems = wareHouseStorageState.slice(indexOfFirstItem, indexOfLastItem);
+    const currentWHStorageStateKeys = Object.keys(wareHouseStorageState).slice(indexOfFirstItem, indexOfLastItem);
+    console.log("набор ключей страницы состояния хранилища склада: ");
+    console.log(currentWHStorageStateKeys);
 
-    // Массив страниц
     const pageNumbers = [];
     for (let i = 1; i <= Math.ceil(wareHouseStorageState.length / itemsPerStorageListPage); i++) {
       pageNumbers.push(i);
@@ -313,25 +319,42 @@ const WareHouseState = (props) => {
 
     return (
       <div className="mt-5">
-        <h2>Складированное</h2>
+        <Accordion defaultActiveKey="0">
+        <Accordion.Item eventKey="0">
+          <Accordion.Header>Складированное:</Accordion.Header>
+          <Accordion.Body>
         {wareHouseStorageState.length === 0 ? (
           <Spinner animation="border" role="status">
             <span className="sr-only">Loading...</span>
           </Spinner>
         ) : (
           <>
-            <Accordion defaultActiveKey="0">
-              {currentItems.map((item, index) => (
-                <Card key={index}>
-                  <Accordion.Toggle as={Card.Header} eventKey={index.toString()}>
-                    {item.name}
-                  </Accordion.Toggle>
-                  <Accordion.Collapse eventKey={index.toString()}>
-                    <Card.Body>{item.amount}</Card.Body>
-                  </Accordion.Collapse>
-                </Card>
-              ))}
-            </Accordion>
+
+          <table>
+          <thead>
+          <tr>
+              <th>Наименование</th>
+              <th>Количество</th>
+          </tr>
+          </thead>
+          <tbody>
+          {Object.keys(currentWHStorageStateKeys).map((index) => {
+                        const whStorageStateKey = currentWHStorageStateKeys[index];
+                        const amount = wareHouseStorageState[whStorageStateKey];
+                        const item = items[whStorageStateKey];
+                        console.log("Ключ: " + whStorageStateKey);
+                        console.log("Количество: " + amount);
+                        console.log("Айтем: ");
+                        console.log(item);
+                        return (
+                          <tr key={whStorageStateKey}>
+                            <td>{item.name}</td>
+                            <td>{amount}</td>
+                          </tr>
+                      )})}
+          </tbody>
+          </table>
+
             <Pagination>
               {pageNumbers.map(number => (
                 <Pagination.Item key={number} active={number === currentPage} onClick={() => handlePaginationClick(number)}>
@@ -341,6 +364,9 @@ const WareHouseState = (props) => {
             </Pagination>
           </>
         )}
+        </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
       </div>
     );
   };
@@ -351,7 +377,7 @@ const WareHouseState = (props) => {
       {renderProblems()}
       {renderWarnings()}
       {renderReports()}
-      {warehouseStorageState()}
+      {renderStorageState()}
     </Container>
   );
 };
@@ -359,7 +385,6 @@ const WareHouseState = (props) => {
 
 
 
-export default WarehouseState;
 
 const Index = (props) => {
   const dispatch = useDispatch();

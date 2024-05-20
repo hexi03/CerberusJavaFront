@@ -9,7 +9,7 @@ export const factorySiteReducer = (state = initialState, action) => {
     console.log(action);
     switch (action.action) {
       case FETCHALL:
-        state = {...state, factorySites: action.factorySites };
+        state = {...state, factorySites: action.factorySites.reduce((dictionary,index) => {dictionary[index.id] = index; return dictionary} , {}) };
         break;
       case FETCHONE:
       case UPDATE:
@@ -24,6 +24,7 @@ export const factorySiteReducer = (state = initialState, action) => {
         break;
       case DELETE:
       case FETCHNOTFOUND:
+        alert(FACTORYSITE+" "+ FETCHNOTFOUND)
         state = {...state, factorySites: {...Object.keys(state.factorySites).reduce((dictionary, key) => {
               if(state.factorySites[key].id != action.id)
               dictionary[state.factorySites[key].id] = state.factorySites[key];

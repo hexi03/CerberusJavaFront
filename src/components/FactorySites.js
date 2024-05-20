@@ -4,11 +4,11 @@ import React, {useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import {Link, useSearchParams} from "react-router-dom";
-import { Container, Form, Button, Row, Col, ListGroup } from 'react-bootstrap';
+import { Container, Form, Button, Row, Col, Accordion, Card, ListGroup } from 'react-bootstrap';
 import {
     createFactorySiteAction, deleteFactorySiteAction,
-    fetchAllFactorySiteAction, fetchOneFactorySiteAction,
-    onDeleteFactorySiteAction, updateFactorySiteAction, updateFactorySiteSupplyAction
+    fetchAllFactorySiteAction, fetchOneFactorySiteAction, fetchOneFactorySiteStateAction,
+    updateFactorySiteAction, updateFactorySiteSupplyAction
 } from "../actions/factorySiteActions.js";
 
 import {
@@ -17,6 +17,8 @@ import {
 import {FactorySiteBuilder} from "../builders/factorySiteBuilder.js";
 
 import {FactorySiteSupplyBuilder} from "../builders/factorySiteSupplyBuilder.js";
+import { ReportType } from "../builders/reportTypes.js";
+import { ReportList } from "./Reports.js";
 
 
 
@@ -191,7 +193,7 @@ const Details = (props) => {
   const factorySiteId = props.id;
 
   useEffect(() => {
-    dispatch(fetchOneFactorySiteStateAction(factorySiteId));
+    dispatch(fetchOneFactorySiteAction(factorySiteId));
   }, [dispatch, factorySiteId]);
 
   const factorySite = useSelector(state => state.factorySite.factorySites[factorySiteId]);
@@ -203,9 +205,9 @@ const Details = (props) => {
       <h2>Форма просмотра деталей производственного участка</h2>
       <hr />
 
-      <ul>
-        <li><b>Наименование: </b>{factorySite.name}</li>
-      </ul>
+      <h4>
+        <b>Наименование: </b>{factorySite.name}
+      </h4>
 
       <FactorySiteState id={factorySiteId}/>
 
@@ -222,19 +224,16 @@ const FactorySiteState = (props) => {
   const factorySiteId = props.id;
 
   useEffect(() => {
-    dispatch(fetchOneFactorySiteAction(factorySiteId));
+    dispatch(fetchOneFactorySiteStateAction(factorySiteId));
   }, [dispatch, factorySiteId]);
 
-  const factorySite = useSelector(state => state.factorySite.factorySites[factorySiteId].state);
+  const factorySiteState = useSelector(state => state.factorySiteState.states[factorySiteId]);
 
-  if (!factorySite && !factorySite.state) return <NotFound />;
-
-  const factorySiteState = factorySite.state;
+  if (!factorySiteState) {
+    return <NotFound />;
+  }
 
   const renderProblems = () => {
-    if (!factorySiteState.problems || factorySiteState.problems.length === 0) {
-      return (<h4>Проблем не найдено</h4>);
-    }
 
     return (
       <div>
@@ -266,23 +265,25 @@ const FactorySiteState = (props) => {
   };
 
   const renderReports = () => {
-    if (!factorySiteState.reports || factorySiteState.reports.length === 0) {
-      return (<h4>Отчетов не найдено</h4>);
+
+    const queryParams = {
+      typeCriteria: ReportType.FS_GENERIC,
+      locationSpecificId: factorySiteState.id
     }
 
     return (
-      <div>
-        <h3>Список отчетов:</h3>
-        <ul>
-          {factorySiteState.reports.map((report, index) => (
-            <li key={index}>{report}</li>
-          ))}
-        </ul>
-      </div>
+      <Accordion defaultActiveKey="0">
+        <Accordion.Item eventKey="0">
+          <Accordion.Header>Список отчетов:</Accordion.Header>
+          <Accordion.Body>
+            <Card>
+              <ReportList queryParams = {queryParams}/>
+            </Card>
+        </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
     );
   };
-
-
 
   return (
     <Container className="mt-5">

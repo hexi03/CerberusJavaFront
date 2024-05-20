@@ -8,147 +8,153 @@ import {
     FETCHONE,
     onErrorAction,
     OK,
-    UPDATE
+    UPDATE,
+    USER
 } from "./actions.js";
 import { UserBuilder } from "../builders/userBuilder.js";
-
+import { updateToken } from "./authActions.js";
 export const fetchAllUsersAction = () => {
     return async (dispatch) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            const response = await axios.get(API_URI + "/user/fetch", {
-                crossDomain: true,
-                headers: {
-                    'Authorization': `Bearer ${authToken}`
-                }
-            });
+        const authToken = localStorage.getItem('authToken');
+        axios.get(API_URI + "/usergroup/fetchUser", {
+            crossDomain: true,
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        })
+        .then(response => {
             dispatch(onFetchAllUserAction(response.data));
-        } catch (error) {
+        })
+        .catch(error => {
             dispatch(onErrorAction(error.message));
-        }
+        }).finally(_ => updateToken());
     };
 }
 
 export const fetchOneUserAction = (id) => {
     return async (dispatch) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            const response = await axios.get(API_URI + "/user/fetch", {
-                crossDomain: true,
-                headers: {
-                    'Authorization': `Bearer ${authToken}`
-                },
-                params: { id }
-            });
+        const authToken = localStorage.getItem('authToken');
+        axios.get(API_URI + "/usergroup/fetchUser", {
+            crossDomain: true,
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            },
+            params: { id }
+        })
+        .then(response => {
             if (response.data.length === 0) {
                 dispatch(onFetchOneNotFoundUserAction(id));
             } else {
                 dispatch(onFetchOneUserAction(response.data[0]));
             }
-        } catch (error) {
+        })
+        .catch(error => {
             dispatch(onErrorAction(error.message));
-        }
+        }).finally(_ => updateToken());
     }
 }
 
 export const createUserAction = (user) => {
     return async (dispatch) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            const response = await axios.post(API_URI + "/user/create", {
-                name: user.name,
-                groupIds : user.groupIds
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Origin': API_ORIGIN
-                }
-            });
+        const authToken = localStorage.getItem('authToken');
+        axios.post(API_URI + "/usergroup/addUser", {
+            name: user.name,
+            groupIds: user.groupIds
+        }, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Origin': API_ORIGIN
+            }
+        })
+        .then(response => {
             user.id = response.data;
             dispatch(onCreateUserAction(user));
-        } catch (error) {
+        })
+        .catch(error => {
             dispatch(onErrorAction(error.message));
-        }
+        }).finally(_ => updateToken());
     }
 }
 
 export const updateUserAction = (user) => {
     return async (dispatch) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            await axios.put(API_URI + "/user/update", {
-                id: user.id,
-                name: user.name,
-                groupIds : user.groupIds
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Origin': API_ORIGIN
-                }
-            });
+        const authToken = localStorage.getItem('authToken');
+        axios.put(API_URI + "/usergroup/updateUser", {
+            id: user.id,
+            name: user.name,
+            groupIds: user.groupIds
+        }, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Origin': API_ORIGIN
+            }
+        })
+        .then(() => {
             dispatch(onUpdateUserAction(user));
-        } catch (error) {
+        })
+        .catch(error => {
             dispatch(onErrorAction(error.message));
-        }
+        }).finally(_ => updateToken());
     }
 }
 
 export const deleteUserAction = (user) => {
     return async (dispatch) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            await axios.delete(API_URI + "/user/delete", {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`,
-                    'Origin': API_ORIGIN
-                },
-                params: { id: user.id }
-            });
+        const authToken = localStorage.getItem('authToken');
+        axios.delete(API_URI + "/usergroup/removeUser", {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Origin': API_ORIGIN
+            },
+            params: { id: user.id }
+        })
+        .then(() => {
             dispatch(onDeleteUserAction(user.id));
-        } catch (error) {
+        })
+        .catch(error => {
             dispatch(onErrorAction(error.message));
-        }
+        }).finally(_ => updateToken());
     }
 }
 
 // SYNC
-export const onFetchAllUserAction = (users) => ({
-    scope: 'USER',
+export const onFetchAllUserAction = (users) => { console.log("Выполнился onFetchAllUserAction");  console.log(users); return {
+    scope: USER,
     action: FETCHALL,
     type: OK,
-    users: users.map(user => (new UserBuilder()).setId(user.id).setName(user.name).setGroupIds(user.groupIds()).build())
-});
+    users: users.map(user => (new UserBuilder()).setId(user.id.id).setName(user.name).setGroupIds(user.groupIds.map((id) => id.id)).build())
+}};
 
 export const onFetchOneUserAction = (user) => ({
-    scope: 'USER',
+    scope: USER,
     action: FETCHONE,
     type: OK,
-    user: (new UserBuilder()).setId(user.id).setName(user.name).setGroupIds(user.groupIds()).build()
+    user: (new UserBuilder()).setId(user.id).setName(user.name).setGroupIds(user.groupIds.map((id) => id.id)).build()
 });
 
 export const onFetchOneNotFoundUserAction = (id) => ({
-    scope: 'USER',
+    scope: USER,
     action: FETCHNOTFOUND,
     type: OK,
     id: id
 });
 
 export const onCreateUserAction = (user) => ({
-    scope: 'USER',
+    scope: USER,
     action: CREATE,
     type: OK,
     user: user
 });
 
 export const onUpdateUserAction = (user) => ({
-    scope: 'USER',
+    scope: USER,
     action: UPDATE,
     type: OK,
     user: user
 });
 
 export const onDeleteUserAction = (id) => ({
-    scope: 'USER',
+    scope: USER,
     action: DELETE,
     type: OK,
     id: id

@@ -9,12 +9,12 @@ export const reportReducer = (state = initialState, action) => {
     console.log(action);
     switch (action.action) {
       case FETCHALL:
-        state = {...state, reports: action.reports };
+        state = {...state, reports: action.reports.reduce((dictionary,index) => {dictionary[index.id] = index; return dictionary} , {}) };
         break;
       case FETCHONE:
       case UPDATE:
         state =  {...state, reports: {...Object.keys(state.reports).reduce((dictionary, key) => {
-              if(state.reports[key].id != action.id)
+              if(state.reports[key].id != action.report.id)
               dictionary[state.reports[key].id] = state.reports[key];
               return dictionary;
             }, {}) }};
@@ -25,7 +25,7 @@ export const reportReducer = (state = initialState, action) => {
       case DELETE:
       case FETCHNOTFOUND:
         state = {...state, reports: {...Object.keys(state.reports).reduce((dictionary, key) => {
-              if(state.reports[key].id != action.id)
+              if(state.reports[key].id != action.report.id)
               dictionary[state.reports[key].id] = state.reports[key];
               return dictionary;
             }, {}) }};

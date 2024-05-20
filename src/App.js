@@ -13,15 +13,16 @@ import { LeftMenu } from './components/LeftMenu.js';
 import { RegistriesPanel } from './components/Registries.js';
 import { ReportManagementPanel } from './components/Reports.js';
 import { UserGroupManagementPanel } from './components/UserGroup.js';
+import { Login } from './actions/login.js';
 
 const App = () => (
   <>
     <Navbar expand="sm" variant="dark" bg="dark">
       <div className="container-fluid">
-        <Navbar.Toggle aria-controls="navbarCollapse" title="Переключить навигацию" />
+        <Navbar.Toggle aria-controls="navbarCollapse" />
         <Navbar.Collapse id="navbarCollapse" className="d-sm-inline-flex justify-content-between">
           <Nav className="navbar-nav flex-grow-1">
-            <Nav.Link href="#login">Login</Nav.Link>
+            {!localStorage.getItem('authToken') ? <Nav.Link href="/login">Login</Nav.Link> : <p>Welcome</p>}
           </Nav>
         </Navbar.Collapse>
       </div>
@@ -36,7 +37,8 @@ const App = () => (
           <Route path="FactorySites/:operation" element={<FactorySites />} />
           <Route path="WareHouses/:operation" element={<WareHouses />} />
           <Route path="Registries/:name/:operation" element={<RegistriesPanel />} />
-          <Route path="Registries/:name/:operation" element={<RegistriesPanel />} />
+          <Route path="Reports/:operation" element={<ReportManagementPanel />} />
+          <Route path="login" element={<Login />} />
         </Routes>
       </Router>
     </div>

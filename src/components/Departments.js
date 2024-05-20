@@ -7,7 +7,7 @@ import {Link, useSearchParams} from "react-router-dom";
 import {
     createDepartmentAction, deleteDepartmentAction,
     fetchAllDepartmentAction, fetchOneDepartmentAction,
-    onDeleteDepartmentAction, updateDepartmentAction
+    updateDepartmentAction
 } from "../actions/departmentActions.js";
 import {DepartmentBuilder} from "../builders/departmentBuilder.js";
 

@@ -9,7 +9,7 @@ export const wareHouseReducer = (state = initialState, action) => {
     console.log(action);
     switch (action.action) {
       case FETCHALL:
-        state = {...state, wareHouses: action.wareHouses };
+        state = {...state, wareHouses: action.wareHouses.reduce((dictionary,index) => {dictionary[index.id] = index; return dictionary} , {}) };
         break;
       case FETCHONE:
       case UPDATE:

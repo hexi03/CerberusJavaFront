@@ -9,7 +9,7 @@ export const itemReducer = (state = initialState, action) => {
     console.log(action);
     switch (action.action) {
       case FETCHALL:
-        state = {...state, items: action.items };
+        state = {...state, items: action.items.reduce((dictionary,index) => {dictionary[index.id] = index; return dictionary} , {}) };
         break;
       case FETCHONE:
       case UPDATE:

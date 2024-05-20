@@ -8,6 +8,8 @@ import {productReducer} from "./productReducer.js";
 import {userReducer} from "./userReducer.js";
 import {groupReducer} from "./groupReducer.js";
 import {reportReducer} from "./reportReducer.js";
+import { factorySiteStateReducer } from './factorySiteStateReducer.js';
+import { wareHouseStateReducer } from './wareHouseStateReducer.js';
 
 
 const rootReducer = combineReducers({
@@ -19,6 +21,8 @@ const rootReducer = combineReducers({
   user: userReducer,
   group: groupReducer,
   report: reportReducer,
+  factorySiteState: factorySiteStateReducer,
+  wareHouseState: wareHouseStateReducer
 });
 
 

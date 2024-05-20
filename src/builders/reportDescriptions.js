@@ -2,217 +2,240 @@
 import { ReportType, ReportFieldType  } from './reportTypes.js';
 import {  } from '../actions/departmentActions.js';
 import { fetchAllWareHouseAction, fetchOneWareHouseAction } from '../actions/wareHouseActions.js';
-import {  } from '../actions/factorySiteActions.js';
+import { fetchOneFactorySiteAction } from '../actions/factorySiteActions.js';
 import { fetchAllItemsAction } from '../actions/itemActions.js';
-import {  } from '../actions/productActions.js';
+import { fetchAllProductAction } from '../actions/productActions.js';
 import { fetchOneReportAction } from '../actions/reportActions.js';
+import { reportFilter } from '../query/reportQuery.js';
 
 export const reportDescriptions = {
   [ReportType.WH_INVENTARISATION]: {
     name: 'Warehouse Inventarisation Report',
-    fetch: (report) => {
-        fetchOneWareHouseAction(report.wareHouseId);
-        fetchAllItemsAction();
-      },
+    fetch:  (report) => {
+        return [
+             fetchOneWareHouseAction(report.wareHouseId),
+             fetchAllItemsAction()
+        ];
+    },
     fields: {
       wareHouseId: {
-        label: 'Warehouse ID',
+        label: 'Склад',
         type: ReportFieldType.NOT_ACCESSIBLE,
-        get: (store, report) => store.warehouses.find(w => w.id === report.wareHouseId),
+        get: (store, report) => store.wareHouse.wareHouses[report.wareHouseId],
         set: (builder, id) => builder.setId(id),
-        getVariants: (store) => store.items.map(item => ({ id: item.id, label: item.name }))
+        getVariants: (store) => store.wareHouse.wareHouses
       },
       items: {
-        label: 'Items',
+        label: 'Учтенное',
         type: ReportFieldType.ITEMS_LIST,
-        get: (store, report) => store.items.filter(item => report.items.includes(item.id)),
-        set: (builder, value) => builder.setItems(value.map(item => item.id)),
-        getVariants: (store) => store.items.map(item => ({ id: item.id, label: item.name }))
+        get: (store, report) => Object.keys(store.item.items).filter(key => Object.keys(report.items).includes(key)).reduce((acc,key) => {acc[key] = {item: store.item.items[key], amount: report.items[key]}; return acc},{}),
+        set: (builder, value) => builder.setItems(value),
+        getVariants: (store) => Object.keys(store.item.items).map(key => ({ id: key, name: store.item.items[key].name }))
       }
     }
   },
   [ReportType.WH_RELEASE]: {
     name: 'Warehouse Release Report',
-    fetch: (report) => {
-
-        fetchOneWareHouseAction(report.wareHouseId);
-        fetchOneReportAction(report.supReqReportId)
-        fetchAllItemsAction();
+    fetch:  (report) => {
+      console.log("fetch called")
+        return [
+             fetchOneWareHouseAction(report.wareHouseId),
+             fetchOneReportAction(report.supReqReportId),
+             fetchAllItemsAction()
+        ];
     },
     fields: {
       wareHouseId: {
-        label: 'Warehouse ID',
+        label: 'Склад',
         type: ReportFieldType.NOT_ACCESSIBLE,
-        get: (store, report) => store.warehouses.find(w => w.id === report.wareHouseId),
-        set: (builder, value) => builder.setId(value),
-        getVariants: (store) => store.items.map(item => ({ id: item.id, label: item.name }))
+        get: (store, report) => store.wareHouse.wareHouses[report.wareHouseId],
+        set: (builder, value) => builder.setWareHouseId(value),
+        getVariants: (store) => store.wareHouse.wareHouses
       },
       supReqReportId: {
-        label: 'Supply Requirement Report ID',
-        type: ReportFieldType.SUP_REQ_REP_SELECT,
-        get: (store, report) => store.supReqReports.find(r => r.id === report.supReqReportId),
+        label: 'Отчет о запросе РМ',
+        type: ReportFieldType.REP_SELECT,
+        get: (store, report) => store.report.reports[report.supReqReportId],
         set: (builder, value) => builder.setWSReportId(value),
-        getVariants: (store) => store.items.map(item => ({ id: item.id, label: item.name }))
+        getVariants: (store) => reportFilter({typeCriteria: ReportType.FS_SUP_REQ}, store.report.reports)
       },
       items: {
-        label: 'Items',
+        label: 'Предоставленное',
         type: ReportFieldType.ITEMS_LIST,
-        get: (store, report) => store.items.filter(item => report.items.includes(item.id)),
-        set: (builder, value) => builder.setItems(value.map(item => item.id)),
-        getVariants: (store) => store.items.map(item => ({ id: item.id, label: item.name }))
+        get: (store, report) => Object.keys(store.item.items).filter(key => Object.keys(report.items).includes(key)).reduce((acc,key) => {acc[key] = {item: store.item.items[key], amount: report.items[key]}; return acc},{}),
+        set: (builder, value) => builder.setItems(value),
+        getVariants: (store) => Object.keys(store.item.items).map(key => ({ id: key, name: store.item.items[key].name }))
       }
     }
   },
   [ReportType.WH_REPLENISHMENT]: {
     name: 'Warehouse Replenishment Report',
-    fetch: (report) => {
-        fetchOneWareHouseAction(report.wareHouseId);
-        fetchAllItemsAction();
+    fetch:  (report) => {
+        return [
+             fetchOneWareHouseAction(report.wareHouseId),
+             fetchAllItemsAction()
+        ];
     },
     fields: {
       wareHouseId: {
-        label: 'Warehouse ID',
+        label: 'Склад',
         type: ReportFieldType.NOT_ACCESSIBLE,
-        get: (store, report) => store.warehouses.find(w => w.id === report.wareHouseId),
-        set: (builder, value) => builder.setId(value),
-        getVariants: (store) => store.items.map(item => ({ id: item.id, label: item.name }))
+        get: (store, report) => store.wareHouse.wareHouses[report.wareHouseId],
+        set: (builder, value) => builder.setWareHouseId(value),
+        getVariants: (store) => store.wareHouse.wareHouses
       },
       items: {
-        label: 'Items',
+        label: 'Принятое',
         type: ReportFieldType.ITEMS_LIST,
-        get: (store, report) => store.items.filter(item => report.items.includes(item.id)),
-        set: (builder, value) => builder.setItems(value.map(item => item.id)),
-        getVariants: (store) => store.items.map(item => ({ id: item.id, label: item.name }))
+        get: (store, report) => Object.keys(store.item.items).filter(key => Object.keys(report.items).includes(key)).reduce((acc,key) => {acc[key] = {item: store.item.items[key], amount: report.items[key]}; return acc},{}),
+        set: (builder, value) => builder.setItems(value),
+        getVariants: (store) => Object.keys(store.item.items).map(key => ({ id: key, name: store.item.items[key].name }))
       }
     }
   },
   [ReportType.WH_WS_REPLENISHMENT]: {
     name: 'Warehouse Workshift Replenishment Report',
-    fetch: (report) => {
-        fetchOneWareHouseAction(report.wareHouseId);
-        fetchOneReportAction(report.workShiftReportId)
-        fetchAllItemsAction();
+    fetch:  (report) => {
+        return [
+             fetchOneWareHouseAction(report.wareHouseId),
+             fetchOneReportAction(report.workShiftReportId),
+             fetchAllItemsAction()
+        ];
     },
     fields: {
       wareHouseId: {
-        label: 'Warehouse ID',
+        label: 'Склад',
         type: ReportFieldType.NOT_ACCESSIBLE,
-        get: (store, report) => store.warehouses.find(w => w.id === report.wareHouseId),
-        set: (builder, value) => builder.setId(value),
-        getVariants: (store) => store.items.map(item => ({ id: item.id, label: item.name }))
+        get: (store, report) => store.wareHouse.wareHouses[report.wareHouseId],
+        set: (builder, value) => builder.setWareHouseId(value),
+        getVariants: (store) => store.wareHouse.wareHouses
       },
       workShiftReportId: {
-        label: 'Workshift Report ID',
-        type: ReportFieldType.WS_REP_SELECT,
-        get: (store, report) => store.workshiftReports.find(r => r.id === report.workShiftReportId),
+        label: 'Отчет о рабочей смене',
+        type: ReportFieldType.REP_SELECT,
+        get: (store, report) => store.report.reports[report.workShiftReportId],
         set: (builder, value) => builder.setWSReportId(value),
-        getVariants: (store) => store.workshiftReports.map(report => ({ id: report.id, label: report.name }))
+        getVariants: (store) => reportFilter({typeCriteria: ReportType.FS_WORKSHIFT}, store.report.reports)
       },
       items: {
-        label: 'Items',
+        label: 'Принятое',
         type: ReportFieldType.ITEMS_LIST,
-        get: (store, report) => store.items.filter(item => report.items.includes(item.id)),
-        set: (builder, value) => builder.setItems(value.map(item => item.id)),
-        getVariants: (store) => store.items.map(item => ({ id: item.id, label: item.name }))
+        get: (store, report) => Object.keys(store.item.items).filter(key => Object.keys(report.items).includes(key)).reduce((acc,key) => {acc[key] = {item: store.item.items[key], amount: report.items[key]}; return acc},{}),
+        set: (builder, value) => builder.setItems(value),
+        getVariants: (store) => Object.keys(store.item.items).map(key => ({ id: key, name: store.item.items[key].name }))
+      },
+      items: {
+        label: 'Возвращенные РМ:',
+        type: ReportFieldType.ITEMS_LIST,
+        get: (store, report) => Object.keys(store.item.items).filter(key => Object.keys(report.unclaimedRemains).includes(key)).reduce((acc,key) => {acc[key] = {item: store.item.items[key], amount: report.unclaimedRemains[key]}; return acc},{}),
+        set: (builder, value) => builder.setUnclaimedRemains(value),
+        getVariants: (store) => Object.keys(store.item.items).map(key => ({ id: key, name: store.item.items[key].name }))
       }
     }
   },
   [ReportType.WH_SHIPMENT]: {
     name: 'Warehouse Shipment Report',
-    fetch: (report) => {
-        fetchOneWareHouseAction(report.wareHouseId);
-        fetchAllItemsAction();
+    fetch:  (report) => {
+        return [
+             fetchOneWareHouseAction(report.wareHouseId),
+             fetchAllItemsAction()
+        ];
     },
     fields: {
       wareHouseId: {
-        label: 'Warehouse ID',
+        label: 'Склад',
         type: ReportFieldType.NOT_ACCESSIBLE,
-        get: (store, report) => store.warehouses.find(w => w.id === report.wareHouseId),
-        set: (builder, value) => builder.setId(value),
-        getVariants: (store) => store.items.map(item => ({ id: item.id, label: item.name }))
+        get: (store, report) => store.wareHouse.wareHouses[report.wareHouseId],
+        set: (builder, value) => builder.setWareHouseId(value),
+        getVariants: (store) => store.wareHouse.wareHouses
       },
       items: {
-        label: 'Items',
+        label: 'Отгруженное',
         type: ReportFieldType.ITEMS_LIST,
-        get: (store, report) => store.items.filter(item => report.items.includes(item.id)),
-        set: (builder, value) => builder.setItems(value.map(item => item.id)),
-        getVariants: (store) => store.items.map(item => ({ id: item.id, label: item.name }))
+        get: (store, report) => Object.keys(store.item.items).filter(key => Object.keys(report.items).includes(key)).reduce((acc,key) => {acc[key] = {item: store.item.items[key], amount: report.items[key]}; return acc},{}),
+        set: (builder, value) => builder.setItems(value),
+        getVariants: (store) => Object.keys(store.item.items).map(key => ({ id: key, name: store.item.items[key].name }))
       }
     }
   },
   [ReportType.FS_SUP_REQ]: {
     name: 'Factory Site Supply Requirement Report',
-    fetch: (report) => {
-        fetchOneFactorySiteAction(report.factorySiteId);
-        fetchAllWareHouseAction();
-        fetchAllItemsAction();
+    fetch:  (report) => {
+        return [
+             fetchOneFactorySiteAction(report.factorySiteId),
+             fetchAllWareHouseAction(),
+             fetchAllItemsAction()
+        ];
     },
     fields: {
       factorySiteId: {
-        label: 'Factory Site ID',
+        label: 'Производственный участок',
         type: ReportFieldType.NOT_ACCESSIBLE,
-        get: (store, report) => store.factorySites.find(f => f.id === report.factorySiteId),
-        set: (builder, value) => builder.setId(value),
-        getVariants: (store) => store.factorySites.map(factorySite => ({ id: factorySite.id, label: factorySite.name }))
+        get: (store, report) => store.factorySite.factorySites[report.factorySiteId],
+        set: (builder, value) => builder.setFactorySiteId(value),
+        getVariants: (store) => store.factorySite.factorySites
       },
       targetWareHouseIds: {
-        label: 'Target Warehouse IDs',
-        type: ReportFieldType.WAREHOUSE_SELECT,
-        get: (store, report) => report.targetWareHouseIds.map(id => store.warehouses.find(w => w.id === id)),
-        set: (builder, value) => builder.setSetTargetWareHouseIds(value.map(w => w.id)),
-        getVariants: (store) => store.warehouses.map(warehouse => ({ id: warehouse.id, label: warehouse.name }))
+        label: 'Заявленные целевые склады',
+        type: ReportFieldType.WAREHOUSE_LIST,
+        get: (store, report) => report.targetWareHouseIds.map((key) => store.wareHouse.wareHouses[key]),
+        set: (builder, value) => builder.setSetTargetWareHouseIds(value),
+        getVariants: (store) => store.wareHouse.wareHouses
       },
       items: {
-        label: 'Items',
+        label: 'Запрошенное',
         type: ReportFieldType.ITEMS_LIST,
-        get: (store, report) => store.items.filter(item => report.items.includes(item.id)),
-        set: (builder, value) => builder.setItems(value.map(item => item.id)),
-        getVariants: (store) => store.items.map(item => ({ id: item.id, label: item.name }))
+        get: (store, report) => Object.keys(store.item.items).filter(key => Object.keys(report.items).includes(key)).reduce((acc,key) => {acc[key] = {item: store.item.items[key], amount: report.items[key]}; return acc},{}),
+        set: (builder, value) => builder.setItems(value),
+        getVariants: (store) => Object.keys(store.item.items).map(key => ({ id: key, name: store.item.items[key].name }))
       }
     }
   },
   [ReportType.FS_WORKSHIFT]: {
     name: 'Factory Site Workshift Report',
-    fetch: (report) => {
-        fetchOneFactorySiteAction(report.factorySiteId);
-        fetchAllWareHouseAction();
-        fetchAllItemsAction();
+    fetch:  (report) => {
+        return [
+             fetchOneFactorySiteAction(report.factorySiteId),
+             fetchAllWareHouseAction(),
+             fetchAllItemsAction(),
+             fetchAllProductAction()
+        ];
     },
     fields: {
       factorySiteId: {
-        label: 'Factory Site ID',
+        label: 'Производственный участок',
         type: ReportFieldType.NOT_ACCESSIBLE,
-        get: (store, report) => store.factorySites.find(f => f.id === report.factorySiteId),
-        set: (builder, value) => builder.setId(value),
-        getVariants: (store) => store.factorySites.map(factorySite => ({ id: factorySite.id, label: factorySite.name }))
+        get: (store, report) => store.factorySite.factorySites[report.factorySiteId],
+        set: (builder, value) => builder.setFactorySiteId(value),
+        getVariants: (store) => store.factorySite.factorySites
       },
       targetWareHouseIds: {
-        label: 'Target Warehouse IDs',
-        type: ReportFieldType.WAREHOUSE_SELECT,
-        get: (store, report) => report.targetWareHouseIds.map(id => store.warehouses.find(w => w.id === id)),
-        set: (builder, value) => builder.setSetTargetWareHouseIds(value.map(w => w.id)),
-        getVariants: (store) => store.warehouses.map(warehouse => ({ id: warehouse.id, label: warehouse.name }))
+        label: 'Заявленные целевые склады',
+        type: ReportFieldType.WAREHOUSE_LIST,
+        get: (store, report) => report.targetWareHouseIds.map((key) => store.wareHouse.wareHouses[key]),
+        set: (builder, value) => builder.setSetTargetWareHouseIds(value),
+        getVariants: (store) => store.wareHouse.wareHouses
       },
       produced: {
-        label: 'Produced',
-        type: ReportFieldType.ITEMS_LIST_LIMITED,
-        get: (store, report) => store.items.filter(item => report.produced.includes(item.id)),
-        set: (builder, value) => builder.setItems(value.map(item => item.id)),
-        getVariants: (store) => store.items.map(item => ({ id: item.id, label: item.name }))
+        label: 'Произведенное',
+        type: ReportFieldType.PRODUCTS_LIST,
+        get: (store, report) => Object.keys(store.product.products).filter(key => Object.keys(report.produced).includes(key)).reduce((acc,key) => {acc[key] = {product: store.product.products[key], amount: report.produced[key]}; return acc},{}),
+        set: (builder, value) => builder.setItems(value),
+        getVariants: (store) =>Object.keys(store.product.products).map(key => ({ id: key, name: store.item.items[store.product.products[key].producedItemId].name }))
       },
       losses: {
-        label: 'Losses',
-        type: ReportFieldType.ITEMS_LIST_LIMITED,
-        get: (store, report) => store.items.filter(item => report.losses.includes(item.id)),
-        set: (builder, value) => builder.setLosses(value.map(item => item.id)),
-        getVariants: (store) => store.items.map(item => ({ id: item.id, label: item.name }))
+        label: 'Потери',
+        type: ReportFieldType.ITEMS_LIST,
+        get: (store, report) => Object.keys(store.item.items).filter(key => Object.keys(report.losses).includes(key)).reduce((acc,key) => {acc[key] = {item: store.item.items[key], amount: report.losses[key]}; return acc},{}),
+        set: (builder, value) => builder.setLosses(value),
+        getVariants: (store) => Object.keys(store.item.items).map(key => ({ id: key.id, name: store.item.items[key].name }))
       },
       remains: {
-        label: 'Remains',
-        type: ReportFieldType.ITEMS_LIST_LIMITED,
-        get: (store, report) => store.items.filter(item => report.remains.includes(item.id)),
-        set: (builder, value) => builder.setRemains(value.map(item => item.id)),
-        getVariants: (store) => store.items.map(item => ({ id: item.id, label: item.name }))
+        label: 'Остатки РМ',
+        type: ReportFieldType.ITEMS_LIST,
+        get: (store, report) => Object.keys(store.item.items).filter(key => Object.keys(report.remains).includes(key)).reduce((acc,key) => {acc[key] = {item: store.item.items[key], amount: report.remains[key]}; return acc},{}),
+        set: (builder, value) => builder.setRemains(value),
+        getVariants: (store) => Object.keys(store.item.items).map(key => ({ id: key, name: store.item.items[key].name }))
       }
     }
   },

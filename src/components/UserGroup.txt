@@ -171,23 +171,6 @@ export const UserGroupManagementPanel = () => {
   };
 
 
-  const RenderUserDetails = () => {
-   return (<></>)
-  }
-
-  const RenderUserDeleteForm = () => {
-   return (<></>)
-  }
-
-  const RenderGroupDetails = () => {
-   return (<></>)
-  }
-
-  const RenderGroupDeleteForm = () => {
-   return (<></>)
-  }
-
-
 
 switch (name) {
   case 'user':

@@ -1,15 +1,16 @@
 export class ReportType{
-    static WH_GENERIC = "WH_GENERIC"
-    static FS_GENERIC = "FS_GENERIC"
 
-    static WH_INVENTARISATION = "WH_INVENTARISATION"
-    static WH_RELEASE = "WH_RELEASE"
-    static WH_REPLENISHMENT = "WH_REPLENISHMENT"
-    static WH_WS_REPLENISHMENT = "WH_WS_REPLENISHMENT"
-    static WH_SHIPMENT = "WH_SHIPMENT"
+    static WH_GENERIC = "warehouse_generic";
+    static FS_GENERIC = "factorysite_generic";
 
-    static FS_SUP_REQ = "FS_SUP_REQ"
-    static FS_WORKSHIFT = "FS_WORKSHIFT"
+    static WH_INVENTARISATION = "inventarisation"
+    static WH_RELEASE = "release"
+    static WH_REPLENISHMENT = "replenishment"
+    static WH_WS_REPLENISHMENT = "workshiftreplenishment"
+    static WH_SHIPMENT = "shipment"
+
+    static FS_SUP_REQ = "supplyrequirement"
+    static FS_WORKSHIFT = "workshift"
 
 }
 
@@ -20,8 +21,7 @@ export class ReportFieldType {
   static DELETED_DATETIME = 'DELETED_DATETIME';
   static DATETIME = 'DATETIME';
   static WAREHOUSE_SELECT = 'WAREHOUSE_SELECT';
-  static SUP_REQ_REP_SELECT = 'SUP_REQ_REP_SELECT';
-  static WS_REP_SELECT = 'WS_REP_SELECT';
+  static REP_SELECT = 'REP_SELECT';
   static ITEMS_LIST = 'ITEMS_LIST';
   static PRODUCTS_LIST = 'PRODUCTS_LIST';
   static ITEMS_LIST_VARIANTS = 'ITEMS_LIST_VARIANTS';

@@ -9,10 +9,12 @@ import {
     FETCHONE,
     onErrorAction,
     UPDATE,
-    UPDATESUPPLY
+    UPDATESUPPLY,
+    FACTORYSITESTATE
 } from "./actions.js";
 import {FactorySiteBuilder} from "../builders/factorySiteBuilder.js";
-
+import { FactorySiteStateBuilder } from "../builders/factorySiteStateBuilder.js";
+import { updateToken } from "./authActions.js";
 
 export const fetchAllFactorySiteAction = () => {
     return async (dispatch) => {
@@ -29,41 +31,42 @@ export const fetchAllFactorySiteAction = () => {
             .then(response => dispatch(onFetchAllFactorySiteAction(response.data)))
             .catch(error => {
                 dispatch(onErrorAction(error.message))
-            })
+            }).finally(_ => updateToken())
     };
 
 }
 
 export const fetchOneFactorySiteAction = (id) =>{
-return async (dispatch) => {
-    const authToken = localStorage.getItem('authToken')
-    axios({
-        method: 'get',
-        url: API_URI + "/factorysite/fetch",
-        timeout: 4000,    // 4 seconds timeout
-        headers: {
-            'Authorization': `Bearer ${authToken}`,
-            'Origin':API_ORIGIN
-        },
-        params: new URLSearchParams({
-            id: id,
-        })
-    })
-        .then(response => dispatch(onFetchOneFactorySiteAction(response.data[0])))
-        .catch(error => {
-            console.log(error)
-            if (error.response && error.response.status === 404){
-                dispatch(onFetchOneNotFoundFactorySiteAction(id))
-            }else{
-                dispatch(onErrorAction(error.message))
-            }
-        })
-}
+        return async (dispatch) => {
+            const authToken = localStorage.getItem('authToken')
+            axios({
+                method: 'get',
+                url: API_URI + "/factorysite/fetch",
+                timeout: 4000,    // 4 seconds timeout
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Origin':API_ORIGIN
+                },
+                params: new URLSearchParams({
+                    id: id,
+                })
+            })
+                .then(response => dispatch(onFetchOneFactorySiteAction(response.data[0])))
+            .catch(error => {
+                    console.log(error)
+                    if (error.response && error.response.status === 404){
+                        dispatch(onFetchOneNotFoundFactorySiteAction(id))
+                    }else{
+                        dispatch(onErrorAction(error.message))
+                    }
+                }).finally(_ => updateToken())
+        }
 }
 
 
 
 export const createFactorySiteAction = (factorySite) =>{
+
     console.log("createFactorySiteAction")
     console.log(factorySite)
 return async (dispatch) => {
@@ -83,9 +86,9 @@ return async (dispatch) => {
         }
     })
         .then(response => {factorySite.id = response.data; dispatch(onCreateFactorySiteAction(factorySite))})
-        .catch(error => {
+            .catch(error => {
             dispatch(onErrorAction(error.message))
-        })
+        }).finally(_ => updateToken())
 }}
 
 
@@ -109,9 +112,9 @@ return async (dispatch) => {
             name : factorySite.name
         }
     }).then(response => dispatch(onUpdateFactorySiteAction(factorySite)))
-        .catch(error => {
+            .catch(error => {
             dispatch(onErrorAction(error.message))
-        })
+        }).finally(_ => updateToken())
 
 }}
 
@@ -135,9 +138,9 @@ return async (dispatch) => {
         })
     })
         .then(response => dispatch(onDeleteFactorySiteAction(factorySite.id)))
-        .catch(error => {
+            .catch(error => {
             dispatch(onErrorAction(error.message))
-        })
+        }).finally(_ => updateToken())
 }}
 
 
@@ -157,11 +160,41 @@ return async (dispatch) => {
             id : id,
         }
     }).then(response => dispatch(onUpdateFactorySiteSupplyAction(id, factorySiteSupply)))
-        .catch(error => {
+            .catch(error => {
             dispatch(onErrorAction(error.message))
-        })
+        }).finally(_ => updateToken())
 
 }}
+
+
+export const fetchOneFactorySiteStateAction = (id) =>{
+        return async (dispatch) => {
+            const authToken = localStorage.getItem('authToken')
+            axios({
+                method: 'get',
+                url: API_URI + "/factorysite/getState",
+                timeout: 4000,    // 4 seconds timeout
+                headers: {
+                    'Authorization': `Bearer ${authToken}`,
+                    'Origin':API_ORIGIN
+                },
+                params: new URLSearchParams({
+                    id: id,
+                })
+            })
+                .then(response => dispatch(onFetchOneFactorySiteStateAction(id, response.data)))
+            .catch(error => {
+                    console.log(error)
+                    if (error.response && error.response.status === 404){
+                        dispatch(onFetchOneNotFoundFactorySiteStateAction(id))
+                    }else{
+                        dispatch(onErrorAction(error.message))
+                    }
+                }).finally(_ => updateToken())
+        }
+}
+
+
 
 //SYNC
 export const onFetchAllFactorySiteAction = (factorySites) => {return {
@@ -171,7 +204,8 @@ export const onFetchAllFactorySiteAction = (factorySites) => {return {
     factorySites: factorySites.map((fs) => ((new FactorySiteBuilder()).setId(fs.id.id).setDepartmentId(fs.departmentId.id).setName(fs.name).build()))
 }};
 
-export const onFetchOneFactorySiteAction = (fs) => {return {
+export const onFetchOneFactorySiteAction = (fs) => {
+    return {
     scope: FACTORYSITE,
     action: FETCHONE,
     type: OK,
@@ -213,5 +247,20 @@ export const onDeleteFactorySiteAction = (id) => ({
     scope: FACTORYSITE,
     action: DELETE,
     type: OK,
+    id: id.id
+});
+
+
+export const onFetchOneFactorySiteStateAction = (id, fsState) => {return {
+    scope: FACTORYSITESTATE,
+    action: FETCHONE,
+    type: OK,
+    state: (new FactorySiteStateBuilder()).setId(id).setProblems(fsState.problems).setWarnings(fsState.warnings).build()
+}};
+
+export const onFetchOneNotFoundFactorySiteStateAction = (id) => ({
+    scope: FACTORYSITESTATE,
+    type: OK,
+    action: FETCHNOTFOUND,
     id: id.id
 });
