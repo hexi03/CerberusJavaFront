@@ -56,8 +56,9 @@ export const fetchOneItemAction = (id) => {
 export const createItemAction = (item) => {
     return (dispatch) => {
         const authToken = localStorage.getItem('authToken');
-        axios.post(API_URI + "/registry/add", {
-            name: item.name
+        axios.post(API_URI + "/registry/addItem", {
+            name: item.name,
+            units: item.units
         }, {
             headers: {
                 'Authorization': `Bearer ${authToken}`,
@@ -79,7 +80,8 @@ export const updateItemAction = (item) => {
         const authToken = localStorage.getItem('authToken');
         axios.put(API_URI + "/registry/updateItem", {
             id: item.id,
-            name: item.name
+            name: item.name,
+            units: item.units
         }, {
             headers: {
                 'Authorization': `Bearer ${authToken}`,
@@ -119,14 +121,14 @@ export const onFetchAllItemsAction = (items) => ({
     scope: 'ITEM',
     action: FETCHALL,
     type: OK,
-    items: items.map(item => (new ItemBuilder()).setId(item.id.id).setName(item.name).build())
+    items: items.map(item => (new ItemBuilder()).setId(item.id.id).setName(item.name).setUnits(item.units).build())
 });
 
 export const onFetchOneItemAction = (item) => ({
     scope: 'ITEM',
     action: FETCHONE,
     type: OK,
-    item: (new ItemBuilder()).setId(item.id).setName(item.name).build()
+    item: (new ItemBuilder()).setId(item.id).setName(item.name).setUnits(item.units).build()
 });
 
 export const onFetchOneNotFoundItemAction = (id) => ({

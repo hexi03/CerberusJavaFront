@@ -26,58 +26,58 @@ export const reportFilter = (queryParams, reports) => {
                         rep.type === ReportType.WH_REPLENISHMENT ||
                         rep.type === ReportType.WH_WS_REPLENISHMENT ||
                         rep.type === ReportType.WH_SHIPMENT) &&
-                        rep.wareHouseId === queryParams.locationSpecificId
+                        (!queryParams.locationSpecificId || rep.wareHouseId === queryParams.locationSpecificId)
                     )
                         acc[key] = rep;
                     break;
                 case ReportType.WH_INVENTARISATION:
                     if (
                         rep.type === ReportType.WH_INVENTARISATION &&
-                        rep.wareHouseId === queryParams.locationSpecificId
+                        (!queryParams.locationSpecificId || rep.wareHouseId === queryParams.locationSpecificId)
                     ) acc[key] = rep;
                     break;
                 case ReportType.WH_RELEASE:
                     if (
                         rep.type === ReportType.WH_RELEASE &&
-                        rep.wareHouseId === queryParams.locationSpecificId
+                        (!queryParams.locationSpecificId || rep.wareHouseId === queryParams.locationSpecificId)
                     ) acc[key] = rep;
                     break;
                 case ReportType.WH_REPLENISHMENT:
                     if (
                         rep.type === ReportType.WH_REPLENISHMENT &&
-                        rep.wareHouseId === queryParams.locationSpecificId
+                        (!queryParams.locationSpecificId || rep.wareHouseId === queryParams.locationSpecificId)
                     ) acc[key] = rep;
                     break;
                 case ReportType.WH_WS_REPLENISHMENT:
                     if (
                         rep.type === ReportType.WH_WS_REPLENISHMENT &&
-                        rep.wareHouseId === queryParams.locationSpecificId
+                        (!queryParams.locationSpecificId || rep.wareHouseId === queryParams.locationSpecificId)
                     ) acc[key] = rep;
                     break;
                 case ReportType.WH_SHIPMENT:
                     if (
                         rep.type === ReportType.WH_SHIPMENT &&
-                        rep.wareHouseId === queryParams.locationSpecificId
+                        (!queryParams.locationSpecificId || rep.wareHouseId === queryParams.locationSpecificId)
                     ) acc[key] = rep;
                     break;
                 case ReportType.FS_GENERIC:
                     if (
                         (rep.type === ReportType.FS_SUP_REQ ||
                         rep.type === ReportType.FS_WORKSHIFT) &&
-                        rep.factorySiteId === queryParams.locationSpecificId
+                        (!queryParams.locationSpecificId || rep.factorySiteId === queryParams.locationSpecificId)
                     )
                         acc[key] = rep;
                     break;
                 case ReportType.FS_SUP_REQ:
                     if (
                         rep.type === ReportType.FS_SUP_REQ &&
-                        rep.factorySiteId === queryParams.locationSpecificId
+                        (!queryParams.locationSpecificId || rep.factorySiteId === queryParams.locationSpecificId)
                     ) acc[key] = rep;
                     break;
                 case ReportType.FS_WORKSHIFT:
                     if (
                         rep.type === ReportType.FS_WORKSHIFT &&
-                        rep.factorySiteId === queryParams.locationSpecificId
+                        (!queryParams.locationSpecificId || rep.factorySiteId === queryParams.locationSpecificId)
                     ) acc[key] = rep;
                     break;
                 default:

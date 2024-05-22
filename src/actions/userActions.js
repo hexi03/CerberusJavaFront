@@ -59,7 +59,9 @@ export const createUserAction = (user) => {
         const authToken = localStorage.getItem('authToken');
         axios.post(API_URI + "/usergroup/addUser", {
             name: user.name,
-            groupIds: user.groupIds
+            groupIds: user.groupIds,
+            password: user.password,
+            email: user.email
         }, {
             headers: {
                 'Authorization': `Bearer ${authToken}`,
@@ -82,7 +84,8 @@ export const updateUserAction = (user) => {
         axios.put(API_URI + "/usergroup/updateUser", {
             id: user.id,
             name: user.name,
-            groupIds: user.groupIds
+            password: user.password,
+            email: user.email
         }, {
             headers: {
                 'Authorization': `Bearer ${authToken}`,
@@ -98,7 +101,9 @@ export const updateUserAction = (user) => {
     }
 }
 
-export const deleteUserAction = (user) => {
+export const deleteUserAction = (id) => {
+    console.log("deleteUserAction")
+    console.log(id)
     return async (dispatch) => {
         const authToken = localStorage.getItem('authToken');
         axios.delete(API_URI + "/usergroup/removeUser", {
@@ -106,10 +111,10 @@ export const deleteUserAction = (user) => {
                 'Authorization': `Bearer ${authToken}`,
                 'Origin': API_ORIGIN
             },
-            params: { id: user.id }
+            params: { id: id }
         })
         .then(() => {
-            dispatch(onDeleteUserAction(user.id));
+            dispatch(onDeleteUserAction(id));
         })
         .catch(error => {
             dispatch(onErrorAction(error.message));
@@ -122,14 +127,14 @@ export const onFetchAllUserAction = (users) => { console.log("Выполнилс
     scope: USER,
     action: FETCHALL,
     type: OK,
-    users: users.map(user => (new UserBuilder()).setId(user.id.id).setName(user.name).setGroupIds(user.groupIds.map((id) => id.id)).build())
+    users: users.map(user => (new UserBuilder()).setId(user.id.id).setName(user.name).setEmail(user.email).setGroupIds(user.groupIds.map((id) => id.id) || []).build())
 }};
 
 export const onFetchOneUserAction = (user) => ({
     scope: USER,
     action: FETCHONE,
     type: OK,
-    user: (new UserBuilder()).setId(user.id).setName(user.name).setGroupIds(user.groupIds.map((id) => id.id)).build()
+    user: (new UserBuilder()).setId(user.id.id).setName(user.name).setEmail(user.email).setGroupIds(user.groupIds.map((id) => id.id) || []).build()
 });
 
 export const onFetchOneNotFoundUserAction = (id) => ({

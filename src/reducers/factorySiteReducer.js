@@ -1,4 +1,4 @@
-import {CREATE, DELETE, FACTORYSITE, FETCHALL, FETCHNOTFOUND, FETCHONE, UPDATE} from "../actions/actions.js";
+import {CREATE, DELETE, FACTORYSITE, FETCHALL, FETCHNOTFOUND, FETCHONE, UPDATE, UPDATESUPPLY} from "../actions/actions.js";
 
 const initialState = {
   factorySites: {}
@@ -31,6 +31,9 @@ export const factorySiteReducer = (state = initialState, action) => {
               return dictionary;
             }, {}) }};
         break;
+      case UPDATESUPPLY:
+        state.factorySites[action.id] = action.factorySiteSupply.suppliers
+        break
       default:
         break;
     }

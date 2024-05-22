@@ -14,7 +14,7 @@ export const groupReducer = (state = initialState, action) => {
       case FETCHONE:
       case UPDATE:
         state =  {...state, groups: {...Object.keys(state.groups).reduce((dictionary, key) => {
-              if(state.groups[key].id != action.id)
+              if(state.groups[key].id != action.group.id)
               dictionary[state.groups[key].id] = state.groups[key];
               return dictionary;
             }, {}) }};
@@ -25,7 +25,7 @@ export const groupReducer = (state = initialState, action) => {
       case DELETE:
       case FETCHNOTFOUND:
         state = {...state, groups: {...Object.keys(state.groups).reduce((dictionary, key) => {
-              if(state.groups[key].id != action.id)
+              if(state.groups[key].id != action.group.id)
               dictionary[state.groups[key].id] = state.groups[key];
               return dictionary;
             }, {}) }};

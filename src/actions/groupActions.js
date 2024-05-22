@@ -8,7 +8,8 @@ import {
     FETCHONE,
     onErrorAction,
     OK,
-    UPDATE
+    UPDATE,
+    UPDATECOMPOSITION
 } from "./actions.js";
 import { GroupBuilder } from "../builders/groupBuilder.js";
 import { updateToken } from "./authActions.js";
@@ -95,18 +96,21 @@ export const updateGroupAction = (group) => {
     }
 }
 
-export const deleteGroupAction = (group) => {
+export const deleteGroupAction = (id) => {
+    console.log("deleteGroupAction")
+    console.log(id)
     return (dispatch) => {
         const authToken = localStorage.getItem('authToken');
         axios.delete(API_URI + "/usergroup/removeGroup", {
+            crossDomain: true,
             headers: {
                 'Authorization': `Bearer ${authToken}`,
                 'Origin': API_ORIGIN
             },
-            params: { id: group.id }
+            params: { id: id }
         })
         .then(() => {
-            dispatch(onDeleteGroupAction(group.id));
+            dispatch(onDeleteGroupAction(id));
         })
         .catch(error => {
             dispatch(onErrorAction(error.message));
@@ -114,19 +118,44 @@ export const deleteGroupAction = (group) => {
     }
 }
 
+
+export const updateGroupCompositionAction = (groupMod) => {
+    return (dispatch) => {
+        const authToken = localStorage.getItem('authToken');
+        axios.put(API_URI + "/usergroup/setUsers", {
+            id: groupMod.id,
+            users: groupMod.userIds
+        }, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`,
+                'Origin': API_ORIGIN
+            }
+        })
+        .then(() => {
+            dispatch(onUpdateGroupCompositionAction(groupMod));
+        })
+        .catch(error => {
+            dispatch(onErrorAction(error.message));
+        }).finally(_ => updateToken());
+    }
+}
+
+
+
+
 // SYNC
 export const onFetchAllGroupAction = (groups) => ({
     scope: 'GROUP',
     action: FETCHALL,
     type: OK,
-    groups: groups.map(group => (new GroupBuilder()).setId(group.id.id).setName(group.name).build())
+    groups: groups.map(group => (new GroupBuilder()).setId(group.id.id).setName(group.name).setUserIds(group.userIds.map((id) => id.id) || []).build())
 });
 
 export const onFetchOneGroupAction = (group) => ({
     scope: 'GROUP',
     action: FETCHONE,
     type: OK,
-    group: (new GroupBuilder()).setId(group.id).setName(group.name).build()
+    group: (new GroupBuilder()).setId(group.id.id).setName(group.name).setUserIds(group.userIds.map((id) => id.id) || []).build()
 });
 
 export const onFetchOneNotFoundGroupAction = (id) => ({
@@ -148,6 +177,13 @@ export const onUpdateGroupAction = (group) => ({
     action: UPDATE,
     type: OK,
     group: group
+});
+
+export const onUpdateGroupCompositionAction = (groupMod) => ({
+    scope: 'GROUP',
+    action: UPDATECOMPOSITION,
+    type: OK,
+    groupMod: groupMod
 });
 
 export const onDeleteGroupAction = (id) => ({

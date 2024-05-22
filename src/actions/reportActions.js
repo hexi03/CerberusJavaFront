@@ -96,16 +96,13 @@ return async (dispatch) => {
     const authToken = localStorage.getItem('authToken')
     axios({
         method: 'post',
-        url: API_URI + "/report/create",
+        url: API_URI + "/report/append",
         timeout: 4000,    // 4 seconds timeout
         headers: {
             'Authorization': `Bearer ${authToken}`,
             'Origin':API_ORIGIN
         },
-        data: {
-            departmentId : report.departmentId,
-            name : report.name
-        }
+        data: report
     })
         .then(response => {report.id = response.data; dispatch(onCreateReportAction(report))})
         .catch(error => {
@@ -126,11 +123,7 @@ return async (dispatch) => {
             'Authorization': `Bearer ${authToken}`,
             'Origin':API_ORIGIN
         },
-        data: {
-            id : report.id,
-            departmentId : report.departmentId,
-            name : report.name
-        }
+        data: report
     }).then(response => dispatch(onUpdateReportAction(report)))
         .catch(error => {
             dispatch(onErrorAction(error.message))
@@ -147,7 +140,7 @@ return async (dispatch) => {
     const authToken = localStorage.getItem('authToken')
     axios({
         method: 'delete',
-        url: API_URI + "/report/delete",
+        url: API_URI + "/report/remove",
         timeout: 4000,    // 4 seconds timeout
         headers: {
             'Authorization': `Bearer ${authToken}`,

@@ -97,7 +97,8 @@ class FactorySiteGenericReportSubBuilder extends GenericReportSubBuilder{
     }
 
     setFactorySiteId(factorySiteId){
-        console.log("setFactorySiteId");
+        console.log("setFactorySiteId: ");
+        console.log(factorySiteId);
         this.factorySiteId = factorySiteId;
         return this;
     }
@@ -142,11 +143,11 @@ class ReleaseReportSubBuilder extends WareHouseGenericReportSubBuilder{
     constructor(){
         super()
         this.items = null;
-        this.supReqReportId = null;
+        this.supplyReqReportId = null;
     }
 
-    setSupReqReportId(supReqReportId){
-        this.supReqReportId = supReqReportId;
+    setSupReqReportId(supplyReqReportId){
+        this.supplyReqReportId = supplyReqReportId;
         return this;
     }
 
@@ -161,7 +162,7 @@ class ReleaseReportSubBuilder extends WareHouseGenericReportSubBuilder{
             ...base,
             type: ReportType.WH_RELEASE,
             items: this.items,
-            supReqReportId: this.supReqReportId
+            supplyReqReportId: this.supplyReqReportId
         };
     }
 }
@@ -295,13 +296,11 @@ class SupplyRequirementReportSubBuilder extends FactorySiteGenericReportSubBuild
     }
 
     setTargetWareHouseIds(targetWareHouseIds){
-        console.log("setTargetWareHouseIds");
         this.targetWareHouseIds = targetWareHouseIds;
         return this;
     }
 
     setItems(items){
-        console.log("setItems");
         this.items = items;
         return this;
     }

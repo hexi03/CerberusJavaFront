@@ -60,7 +60,7 @@ export const createProductAction = (product) => {
         const authToken = localStorage.getItem('authToken');
         axios.post(API_URI + "/registry/addProduct", {
             producedItemId: product.producedItemId,
-            requirementIds: product.requirementIds
+            requirements: product.requirementIds
         }, {
             headers: {
                 'Authorization': `Bearer ${authToken}`,
@@ -84,7 +84,7 @@ export const updateProductAction = (product) => {
         axios.put(API_URI + "/registry/updateProduct", {
             id: product.id,
             producedItemId: product.producedItemId,
-            requirementIds: product.requirementIds
+            requirements: product.requirementIds
         }, {
             headers: {
                 'Authorization': `Bearer ${authToken}`,

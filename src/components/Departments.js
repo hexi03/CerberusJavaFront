@@ -12,6 +12,8 @@ import {
 import {DepartmentBuilder} from "../builders/departmentBuilder.js";
 
 import { Container, Form, Button, Row, Col } from 'react-bootstrap';
+import { fetchAllFactorySiteAction } from "../actions/factorySiteActions.js";
+import { fetchAllWareHouseAction } from "../actions/wareHouseActions.js";
 
 const NotFound = () => {
   return (
@@ -179,20 +181,62 @@ const Details = (props) => {
 
   useEffect(() => {
     dispatch(fetchOneDepartmentAction(departmentId));
+    dispatch(fetchAllFactorySiteAction());
+    dispatch(fetchAllWareHouseAction());
   }, [dispatch, departmentId]);
 
   const department = useSelector(state => state.department.departments[departmentId]);
+  const {factorySites} = useSelector(state => {return state.factorySite});
+    const {wareHouses} = useSelector(state => {return state.wareHouse});
 
   if (!department) return <NotFound />;
 
   return (
     <Container className="mt-5">
-      <h2>Форма просмотра деталей отдела</h2>
+      <h2>Форма просмотра деталей подразделения</h2>
       <hr />
 
       <ul>
         <li><b>Наименование: </b>{department.name}</li>
-      </ul>
+
+        <li>
+
+            <details onClick={()=>{}}>
+                <summary>
+                    <Link to={{pathname: "/FactorySites/index", search: `?id=${departmentId}`}}>Производственные участки</Link>
+                </summary>
+                <ul>
+
+
+                    {Object.keys(factorySites).filter((factorySiteId) => factorySites[factorySiteId].departmentId === departmentId).map(factorySite_id => (
+
+                        <li>
+                            <Link to={{pathname: "/FactorySites/details", search: `?id=${factorySite_id}`}}>{factorySites[factorySite_id].name.replace(/\s/g, '') ? factorySites[factorySite_id].name : "Без названия"}</Link>
+
+                        </li>
+                    ))}
+                </ul>
+            </details>
+        </li>
+        <li>
+            <details>
+                <summary>
+                    <Link to={{pathname: "/WareHouses/index", search: `?id=${departmentId}`}}>Склады</Link>
+                </summary>
+                <ul>
+
+
+                    {Object.keys(wareHouses).filter((wareHouseId) => wareHouses[wareHouseId].departmentId === departmentId).map(wareHouse_id => (
+
+                        <li>
+                            <Link to={{pathname: "/WareHouses/details", search: `?id=${wareHouses[wareHouse_id].id}`}}>{wareHouses[wareHouse_id].name.replace(/\s/g, '') ? wareHouses[wareHouse_id].name : "Без названия"}</Link>
+
+                        </li>
+                    ))}
+                </ul>
+            </details>
+        </li>
+    </ul>
 
       <Button onClick={() => navigate(-1)} variant="secondary">
         Обратно

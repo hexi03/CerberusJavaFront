@@ -5,6 +5,7 @@ export const FETCHNOTFOUND = "FETCHNOTFOUND";
 
 export const CREATE = "CREATE";
 export const UPDATE = "UPDATE";
+export const UPDATECOMPOSITION = "UPDATECOMPOSITION";
 export const UPDATESUPPLY = "UPDATESUPPLY";
 export const DELETE = "DELETE";
 

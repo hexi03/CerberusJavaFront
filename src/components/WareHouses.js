@@ -14,7 +14,7 @@ import {WareHouseBuilder} from "../builders/wareHouseBuilder.js";
 
 import { Container, Form, Button, Row, Col, Accordion, Card, Pagination, Spinner, ListGroup } from 'react-bootstrap';
 import { fetchAllItemsAction } from "../actions/itemActions.js";
-import { ReportList } from "./Reports.js";
+import { ReportList, ReportSelector } from "./Reports.js";
 import { ReportType } from "../builders/reportTypes.js";
 
 const itemsPerStorageListPage = 5;
@@ -204,7 +204,8 @@ const Details = (props) => {
     <Container className="mt-5">
       <h2>Форма просмотра деталей склада</h2>
       <hr />
-
+      <ReportSelector reportTypes={[ReportType.WH_INVENTARISATION, ReportType.WH_RELEASE, ReportType.WH_REPLENISHMENT, ReportType.WH_SHIPMENT, ReportType.WH_WS_REPLENISHMENT]} operation={"create"} params = {{locationSpecificId: wareHouseId}}/>
+      <hr />
       <h4>
         <b>Наименование: </b>{wareHouse.name}
       </h4>

@@ -1,9 +1,10 @@
 import {useNavigate, useParams} from "react-router";
-import { FormProvider, useForm, useFormContext } from 'react-hook-form';
+import { FormProvider, useForm, useFormContext, useFieldArray } from 'react-hook-form';
 import React, {useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {Link, useSearchParams} from "react-router-dom";
-import { Container, Form, Button, Row, Col, Card, ListGroup, Table, Accordion} from 'react-bootstrap';
+import { LinkContainer } from 'react-router-bootstrap'
+import { Container, Form, Button, Row, Col, Card, ListGroup, ButtonGroup, Table, Accordion} from 'react-bootstrap';
 import { createReportAction, fetchOneReportAction, updateReportAction, fetchAllReportsAction, fetchReportsByQuery } from '../actions/reportActions.js';
 import {ReportBuilder, ReportType} from '../builders/reportBuilder.js';
 import {reportDescriptions} from '../builders/reportDescriptions.js';
@@ -32,7 +33,7 @@ const getFieldViewComponent = (field, store, report) => {
 
         return (
           <div>
-            <b>{field.label}</b>: <p><Link to={{pathname: "/Reports/details", search: `?id=${rep.id}`}}>{rep.id}</Link></p>
+            <b>{field.label}</b>: <p><Link to={{pathname: "/Reports/details", search: `?id=${rep.id}`}}>reportDescriptions[rep.type].name + " от " + new Date(rep.createdAt).toLocaleString()</Link></p>
           </div>
         );
 
@@ -243,29 +244,31 @@ const ReportView = ({reportId }) => {
 
 
 
-const GetFieldEditComponent = ({field, store, report, fieldName}) => {
-    const { register } = useFormContext();
+const GetFieldEditComponent = ({ field, store, report, reportType, fieldName, isEditMode, defaultValue, params }) => {
+    const { register, control } = useFormContext();
+    const { fields, append, remove } = useFieldArray({ control, name: fieldName });
+    defaultValue = isEditMode ? reportDescriptions[reportType].fields[fieldName].get(store, report) : defaultValue;
 
     switch (field.type) {
         case ReportFieldType.REP_SELECT:
-            const repOptions = field.getVariants(store) || [];
+            const repOptions = field.getVariants(store, params) || [];
             return (
                 <Form.Group>
                     <Form.Label>{field.label}</Form.Label>
-                    <Form.Control as="select" {...register(fieldName)} defaultValue={reportDescriptions[report.type].get(store, report)}>
+                    <Form.Control as="select" {...register(fieldName)} defaultValue={defaultValue}>
                         {repOptions.map(rep => (
-                            <option key={rep.id} value={rep.id}>{rep.id}</option>
+                            <option key={rep.id} value={rep.id}>{reportDescriptions[rep.type].name + " от " + new Date(rep.createdAt).toLocaleString()}</option>
                         ))}
                     </Form.Control>
                 </Form.Group>
             );
 
         case ReportFieldType.WAREHOUSE_SELECT:
-            const whOptions = field.getVariants(store) || [];
+            const whOptions = field.getVariants(store, params) || [];
             return (
                 <Form.Group>
                     <Form.Label>{field.label}</Form.Label>
-                    <Form.Control as="select" {...register(fieldName)} defaultValue={reportDescriptions[report.type].get(store, report)}>
+                    <Form.Control as="select" {...register(fieldName)} defaultValue={defaultValue}>
                         {whOptions.map(wh => (
                             <option key={wh.id} value={wh.id}>{wh.name}</option>
                         ))}
@@ -274,41 +277,77 @@ const GetFieldEditComponent = ({field, store, report, fieldName}) => {
             );
 
         case ReportFieldType.WAREHOUSE_LIST:
-            const whListOptions = field.getVariants(store) || [];
+            const whListOptions = field.getVariants(store, params) || [];
+
             return (
                 <Form.Group>
                     <Form.Label>{field.label}</Form.Label>
-                    <Form.Control as="select" multiple {...register(fieldName)} defaultValue={reportDescriptions[report.type].get(store, report)}>
-                        {whListOptions.map(wh => (
-                            <option key={wh.id} value={wh.id}>{wh.name}</option>
-                        ))}
-                    </Form.Control>
+                    {fields.map((item, index) => (
+                        <div key={item.id} className="d-flex mb-2">
+                            <Form.Control as="select" {...register(`${fieldName}[${index}]`)} defaultValue={item.value || ""}>
+                                {whListOptions.map(wh => (
+                                    <option key={wh.id} value={wh.id}>{wh.name}</option>
+                                ))}
+                            </Form.Control>
+                            <Button variant="danger" onClick={() => remove(index)}>Remove</Button>
+                        </div>
+                    ))}
+                    <Button variant="primary" onClick={() => append({ value: "" })}>Add Warehouse</Button>
                 </Form.Group>
             );
 
         case ReportFieldType.ITEMS_LIST:
-            const itemListOptions = field.getVariants(store) || [];
+            const itemListOptions = field.getVariants(store, params) || [];
+            console.log("itemListOptions")
+            console.log(field.getVariants(store, params))
             return (
                 <Form.Group>
                     <Form.Label>{field.label}</Form.Label>
-                    <Form.Control as="select" multiple {...register(fieldName)} defaultValue={reportDescriptions[report.type].get(store, report)}>
-                        {itemListOptions.map(item => (
-                            <option key={item.id} value={item.id}>{item.name}</option>
-                        ))}
-                    </Form.Control>
+                    {fields.map((item, index) => (
+                        <div key={item.id} className="d-flex mb-2">
+                            <Form.Control as="select" {...register(`${fieldName}[${index}].id`)} defaultValue={item.id || ""}>
+                                {itemListOptions.map(option => (
+                                    <option key={option.id} value={option.id}>{option.name}</option>
+                                ))}
+                            </Form.Control>
+                            <Form.Control
+                                type="number"
+                                placeholder="Amount"
+                                {...register(`${fieldName}[${index}].amount`)}
+                                defaultValue={item.amount || ""}
+                                className="ml-2"
+                            />
+                            <Button variant="danger" onClick={() => remove(index)}>Remove</Button>
+                        </div>
+                    ))}
+                    <Button variant="primary" onClick={() => append({ id: "", amount: "" })}>Add Item</Button>
                 </Form.Group>
             );
 
         case ReportFieldType.PRODUCTS_LIST:
-            const productListOptions = field.getVariants(store) || [];
+            const productListOptions = field.getVariants(store, params) || [];
+
             return (
                 <Form.Group>
                     <Form.Label>{field.label}</Form.Label>
-                    <Form.Control as="select" multiple {...register(fieldName)} defaultValue={reportDescriptions[report.type].get(store, report)}>
-                        {productListOptions.map(product => (
-                            <option key={product.id} value={product.id}>{product.name}</option>
-                        ))}
-                    </Form.Control>
+                    {fields.map((item, index) => (
+                        <div key={item.id} className="d-flex mb-2">
+                            <Form.Control as="select" {...register(`${fieldName}[${index}].id`)} defaultValue={item.id || ""}>
+                                {productListOptions.map(option => (
+                                    <option key={option.id} value={option.id}>{option.name}</option>
+                                ))}
+                            </Form.Control>
+                            <Form.Control
+                                type="number"
+                                placeholder="Amount"
+                                {...register(`${fieldName}[${index}].amount`)}
+                                defaultValue={item.amount || ""}
+                                className="ml-2"
+                            />
+                            <Button variant="danger" onClick={() => remove(index)}>Remove</Button>
+                        </div>
+                    ))}
+                    <Button variant="primary" onClick={() => append({ id: "", amount: "" })}>Add Product</Button>
                 </Form.Group>
             );
 
@@ -316,7 +355,7 @@ const GetFieldEditComponent = ({field, store, report, fieldName}) => {
             return (
                 <Form.Group>
                     <Form.Label>{field.label}</Form.Label>
-                    <Form.Control type="datetime-local" {...register(fieldName)} defaultValue={reportDescriptions[report.type].get(store, report)} />
+                    <Form.Control type="datetime-local" {...register(fieldName)} defaultValue={defaultValue} />
                 </Form.Group>
             );
 
@@ -324,7 +363,7 @@ const GetFieldEditComponent = ({field, store, report, fieldName}) => {
             return (
                 <Form.Group>
                     <Form.Label>{field.label}</Form.Label>
-                    <Form.Control type="datetime-local" {...register(fieldName)} defaultValue={reportDescriptions[report.type].get(store, report)} />
+                    <Form.Control type="datetime-local" {...register(fieldName)} defaultValue={defaultValue} />
                 </Form.Group>
             );
 
@@ -337,8 +376,11 @@ const GetFieldEditComponent = ({field, store, report, fieldName}) => {
 
 
 
-const ReportForm = ({ reportId, isEditMode, reportType}) => {
+
+const ReportForm = ({ isEditMode, reportType, params}) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
 
   const departments = useSelector(state => state.department.departments);
   const factorySites = useSelector(state => state.factorySite.factorySites);
@@ -364,7 +406,8 @@ const ReportForm = ({ reportId, isEditMode, reportType}) => {
     wareHouseState: {states:wareHouseState}
   };
 
-  const report = reports[reportId];
+  const reportId = params.get("id")
+  const report = useSelector(state => state.report.reports[reportId]);
 
   useEffect(() => {
     if (reportId && isEditMode) {
@@ -373,10 +416,11 @@ const ReportForm = ({ reportId, isEditMode, reportType}) => {
   }, [reportId, isEditMode, dispatch]);
 
   useEffect(() => {
-    if (report) {
-      reportDescriptions[report.type].fetch(report).forEach(dispatch);
-    }
-  }, [report, dispatch]);
+      if (isEditMode)
+        reportDescriptions[reportType].fetch(report).forEach(dispatch);
+      else
+        reportDescriptions[reportType].fetchCreate(report).forEach(dispatch);
+  }, [reportType, dispatch]);
 
   const methods = useForm({ defaultValues: report || {} });
 
@@ -388,11 +432,18 @@ const ReportForm = ({ reportId, isEditMode, reportType}) => {
   const reportDescription = reportDescriptions[reportType];
 
   const onSubmit = (data) => {
-    const builder = new ReportBuilder().setType(reportType);
-    Object.keys(data).forEach(fieldName => {
+    var builder = new ReportBuilder().setType(reportType);
+    if (isEditMode) builder = builder.setId(reportId)
+    builder = builder.setId(reportId)
+    Object.keys(reportDescriptions[reportType].fields).forEach(fieldName => {
+      console.log("FIELD:")
+      console.log(fieldName)
+
       const fieldDescription = reportDescriptions[reportType].fields[fieldName];
+
       if (fieldDescription && fieldDescription.set) {
-        fieldDescription.set(builder, data[fieldName]);
+
+        fieldDescription.set(builder, data[fieldName], params);
       }
     });
     const reportData = builder.build();
@@ -402,7 +453,10 @@ const ReportForm = ({ reportId, isEditMode, reportType}) => {
     } else {
       dispatch(createReportAction(reportData));
     }
+    navigate(-1);
   };
+  console.log("reportType")
+  console.log(reportType)
 
   return (
     <FormProvider {...methods}>
@@ -414,7 +468,16 @@ const ReportForm = ({ reportId, isEditMode, reportType}) => {
           const field = reportDescription.fields[fieldName];
           return (
             <div key={fieldName}>
-              <GetFieldEditComponent field = {field} store = {store} report = {report || {}} fieldName = {fieldName}/>
+              <GetFieldEditComponent
+                    field = {field}
+                    store = {store}
+                    report = {report || {}}
+                    fieldName = {fieldName}
+                    reportType = {reportType}
+                    isEditMode={isEditMode}
+                    defaultValue = {""}
+                    params = {params}
+              />
             </div>
           );
         })}
@@ -465,10 +528,10 @@ export const ReportList = ({queryParams}) => {
         <tbody>
             {Object.keys(reports).map(id => (
               <tr key={id}>
-                <td><div><Link to={{pathname: "/Reports/details", search: `?id=${reports[id].id}`}}>{reports[id].id}</Link></div></td>
+                <td><div><Link to={{pathname: "/Reports/details", search: `?id=${id}`}}>{id}</Link></div></td>
                 <td>{reportDescriptions[reports[id].type].name}</td>
                 <td>{new Date(reports[id].createdAt).toLocaleString()}</td>
-                <td><div><Link to={{pathname: "/Users/details", search: `?id=${reports[id].creatorId}`}}>🧑‍💼{users[reports[id].creatorId].name}</Link></div></td>
+                <td><div><Link to={{pathname: "/Users/details", search: `?id=${reports[id].creatorId}`}}>🧑‍💼{(reports[id].creatorId && users[reports[id].creatorId].name) || ""}</Link></div></td>
               </tr>
             ))}
         </tbody>
@@ -492,9 +555,25 @@ const NotFound = () => {
   );
 };
 
+
+
+export const ReportSelector = ({ reportTypes, operation, params }) => {
+  return (
+    <ButtonGroup>
+      {reportTypes.map((reportType) => (
+        <LinkContainer to={{pathname: `/Reports/${operation}/${reportType}`, search: "?" + Object.keys(params).map((key) => `${key}=${params[key]}`).join('&')}} key={reportType}>
+          <Button variant="primary">
+            Создать {reportDescriptions[reportType].name}
+          </Button>
+        </LinkContainer>
+      ))}
+    </ButtonGroup>
+  );
+};
+
 export const ReportManagementPanel = () => {
 
-  const {operation} = useParams();
+  const {operation, reportType} = useParams();
     const [queryParameters, setQueryParameters] = useSearchParams();
 
 
@@ -508,10 +587,10 @@ export const ReportManagementPanel = () => {
             content = <ReportView reportId = { queryParameters.get("id") }/>;
             break;
         case 'create':
-            content = <></>;//<ReportForm reportId = {id} mode = {MODE_CREATE}/>;
+            content = <ReportForm isEditMode = {false} reportType={reportType} params={queryParameters}/>;
             break;
         case 'update':
-            content = <></>;//<ReportForm reportId = {id} mode = {MODE_EDIT}/>;
+            content = <ReportForm isEditMode = {true} params={queryParameters}/>;
             break;
         case 'delete':
             content = <></>;//<ReportDeleteForm reportId = { queryParameters.get("id")}/>;
@@ -526,129 +605,3 @@ export const ReportManagementPanel = () => {
 export default ReportManagementPanel;
 
 
-
-// export const ReportManagementPanel = () => {
-//   const { register, handleSubmit } = useForm();
-//   const navigate = useNavigate();
-//   const dispatch = useDispatch();
-//
-//   const {operation, name} = useParams();
-//     const [queryParameters] = useSearchParams();
-//     const id = queryParameters.get("id");
-//
-//
-//     let content;
-//     console.log("operation:");
-//     console.log(operation);
-//
-//     console.log("name:");
-//     console.log(name);
-//
-//     console.log(id);
-//
-//
-//   // Рендер формы для создания нового отчета
-//   const RenderReportCreateForm = () => {
-//     const onSubmit = (data) => {
-//       dispatch(createReportAction((new ReportBuilder()).setTitle(data.title).build()));
-//       navigate(-1);
-//     };
-//
-//     return (
-//       <Form onSubmit={handleSubmit(onSubmit)}>
-//         <Form.Group controlId="formBasicTitle">
-//           <Form.Label>Title</Form.Label>
-//           <Form.Control type="text" {...register('title')} />
-//         </Form.Group>
-//         <Button variant="primary" type="submit">Submit</Button>
-//       </Form>
-//     );
-//   };
-//
-//   // Рендер формы для обновления информации об отчете
-//   const RenderReportUpdateForm = () => {
-//     // Здесь вы можете использовать useParams() для получения id отчета из URL
-//     // Пока примерно:
-//     const reportId = 123; // Ваш ID отчета
-//     useEffect(() => {
-//       dispatch(fetchOneReportAction(reportId));
-//     }, [dispatch, reportId]);
-//
-//     const report = useSelector(state => state.reports.report[reportId]);
-//
-//     const onSubmit = (data) => {
-//       dispatch(updateReportAction((new ReportBuilder()).setTitle(data.title).setId(reportId).build()));
-//       navigate(-1);
-//     };
-//
-//     return (
-//       <Form onSubmit={handleSubmit(onSubmit)}>
-//         <Form.Group controlId="formBasicTitle">
-//           <Form.Label>Title</Form.Label>
-//           <Form.Control type="text" defaultValue={report.title} {...register('title')} />
-//         </Form.Group>
-//         <Button variant="primary" type="submit">Submit</Button>
-//       </Form>
-//     );
-//   };
-//
-//   const RenderReportDetails = () => {
-//
-//
-//     return (
-//       <></>
-//     );
-//   };
-//
-//   // Рендер списка отчетов
-//   const RenderReportList = () => {
-//     useEffect(() => {
-//       dispatch(fetchAllReportsAction());
-//     }, [dispatch]);
-//
-//     const reports = useSelector(state => state.reports);
-//
-//     return (
-//       <Table striped bordered hover>
-//         <thead>
-//           <tr>
-//             <th>Title</th>
-//           </tr>
-//         </thead>
-//         <tbody>
-//           {reports.map(report => (
-//             <tr key={report.id}>
-//               <td>{report.title}</td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </Table>
-//     );
-//   };
-//
-//
-//
-//   switch (operation) {
-//         case 'index':
-//             content = RenderReportList();
-//             break;
-//         case 'details':
-//             content = RenderReportDetails();
-//             break;
-//         case 'create':
-//             content = RenderReportCreateForm();
-//             break;
-//         case 'update':
-//             content = RenderReportUpdateForm();
-//             break;
-//         case 'delete':
-//             content = RenderReportDeleteForm();
-//             break;
-//         default:
-//             content = <div>Invalid operation</div>;
-//             break;
-//     }
-//     return (content);
-// };
-//
-// export default ReportManagementPanel;

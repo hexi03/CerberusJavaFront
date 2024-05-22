@@ -18,7 +18,7 @@ import {FactorySiteBuilder} from "../builders/factorySiteBuilder.js";
 
 import {FactorySiteSupplyBuilder} from "../builders/factorySiteSupplyBuilder.js";
 import { ReportType } from "../builders/reportTypes.js";
-import { ReportList } from "./Reports.js";
+import { ReportList, ReportSelector } from "./Reports.js";
 
 
 
@@ -204,6 +204,8 @@ const Details = (props) => {
     <Container className="mt-5">
       <h2>Форма просмотра деталей производственного участка</h2>
       <hr />
+      <ReportSelector reportTypes={[ReportType.FS_SUP_REQ, ReportType.FS_WORKSHIFT]} operation={"create"} params = {{locationSpecificId: factorySiteId}}/>
+      <hr />
 
       <h4>
         <b>Наименование: </b>{factorySite.name}
@@ -359,7 +361,7 @@ function SupplyManage(props) {
 
   const factorySite = useSelector(state => state.factorySite.factorySites[factorySiteId]);
   const {wareHouses} = useSelector(state => {return state.wareHouse});
-
+  const inDepartmentWareHouses = Object.values(wareHouses).filter(wh => wareHouses[wh.id].departmentId == factorySite.departmentId)
 
 
   // Состояние для отслеживания выбранных поставщиков
@@ -371,8 +373,8 @@ function SupplyManage(props) {
   useEffect(() => {
     console.log(selectedSuppliers);
     console.log(wareHouses);
-    setSelectedWareHouses(Object.keys(wareHouses).filter((id) => (selectedSuppliers.includes(wareHouses[id].id))).map((id) => wareHouses[id]));
-    setDeSelectedWareHouses(Object.keys(wareHouses).filter((id) => !(selectedSuppliers.includes(wareHouses[id].id))).map((id) => wareHouses[id]));
+    setSelectedWareHouses(inDepartmentWareHouses.filter((wh) => (selectedSuppliers.includes(wh.id))));
+    setDeSelectedWareHouses(inDepartmentWareHouses.filter((wh) => !(selectedSuppliers.includes(wh.id))));
   }, [wareHouses, selectedSuppliers]);
 
     useEffect(() => {
@@ -381,6 +383,13 @@ function SupplyManage(props) {
     console.log("deSelectedWareHouses");
     console.log(deSelectedWareHouses);
   }, [selectedWareHouses, deSelectedWareHouses]);
+
+
+
+  useEffect(() => {
+    if(factorySite && factorySite.suppliers)
+      setSelectedSuppliers(factorySite.suppliers)
+  }, [factorySite, setSelectedSuppliers]);
 
 
 
@@ -400,7 +409,7 @@ function SupplyManage(props) {
   };
 
   const onSubmit = () => {
-    dispatch(updateFactorySiteSupplyAction(factorySiteId, selectedSuppliers.reduce((sup, whId) => sup.addSupplier(whId).build(), new FactorySiteSupplyBuilder())));
+    dispatch(updateFactorySiteSupplyAction(factorySiteId, selectedSuppliers.reduce((sup, whId) => sup.addSupplier(whId), new FactorySiteSupplyBuilder()).build()));
     navigate(-1);
   };
 
@@ -410,6 +419,7 @@ function SupplyManage(props) {
     <Container className="mt-5">
       <h2>Форма управления снабжением участка</h2>
       <hr />
+
 
 
           <h3>

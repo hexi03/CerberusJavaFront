@@ -4,6 +4,7 @@ export class UserBuilder {
        this.name = null;
        this.password = null;
        this.id = null;
+       this.email = null;
        this.groupIds = null;
     }
     setName(name){
@@ -16,11 +17,15 @@ export class UserBuilder {
         return this;
     }
 
+    setEmail(email){
+        this.email = email;
+        return this;
+    }
+
     setGroupIds(groupIds){
         this.groupIds = groupIds;
         return this;
     }
-
 
     setId(id){
         this.id = id;
@@ -31,6 +36,7 @@ export class UserBuilder {
             id: this.id,
             name: this.name,
             password: this.password,
+            email: this.email,
             groupIds: this.groupIds
         };
     }

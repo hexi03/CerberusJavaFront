@@ -144,7 +144,7 @@ return async (dispatch) => {
 }}
 
 
-export const updateFactorySiteSupplyAction = (id, factorySiteSupply) =>{
+export const updateFactorySiteSupplyAction = (factorySiteId, factorySiteSupply) =>{
 return async (dispatch) => {
     const authToken = localStorage.getItem('authToken')
     axios({
@@ -157,9 +157,9 @@ return async (dispatch) => {
         },
         data: {
             suppliers : factorySiteSupply.suppliers,
-            id : id,
+            id : factorySiteId ,
         }
-    }).then(response => dispatch(onUpdateFactorySiteSupplyAction(id, factorySiteSupply)))
+    }).then(response => dispatch(onUpdateFactorySiteSupplyAction(factorySiteId, factorySiteSupply)))
             .catch(error => {
             dispatch(onErrorAction(error.message))
         }).finally(_ => updateToken())
@@ -197,19 +197,24 @@ export const fetchOneFactorySiteStateAction = (id) =>{
 
 
 //SYNC
-export const onFetchAllFactorySiteAction = (factorySites) => {return {
+export const onFetchAllFactorySiteAction = (factorySites) => {
+    console.log("onFetchAllFactorySiteAction:")
+    console.log(factorySites)
+    return {
     scope: FACTORYSITE,
     action: FETCHALL,
     type: OK,
-    factorySites: factorySites.map((fs) => ((new FactorySiteBuilder()).setId(fs.id.id).setDepartmentId(fs.departmentId.id).setName(fs.name).build()))
+    factorySites: factorySites.map((fs) => ((new FactorySiteBuilder()).setId(fs.id.id).setDepartmentId(fs.departmentId.id).setName(fs.name).setSuppliers(fs.suppliers.map(id => id.id)).build()))
 }};
 
 export const onFetchOneFactorySiteAction = (fs) => {
+    console.log("onFetchOneFactorySiteAction:")
+    console.log(fs)
     return {
     scope: FACTORYSITE,
     action: FETCHONE,
     type: OK,
-    factorySite: (new FactorySiteBuilder()).setId(fs.id.id).setDepartmentId(fs.departmentId.id).setName(fs.name).build()
+    factorySite: (new FactorySiteBuilder()).setId(fs.id.id).setDepartmentId(fs.departmentId.id).setName(fs.name).setSuppliers(fs.suppliers.map(id => id.id)).build()
 }};
 
 export const onFetchOneNotFoundFactorySiteAction = (id) => ({

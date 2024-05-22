@@ -1,16 +1,7 @@
 import {API_URI, API_ORIGIN} from "../consts.js";
 import axios from "axios";
-import {
-    CREATE,
-    DELETE,
-    DEPARTMENT,
-    FETCHALL, OK,
-    FETCHNOTFOUND,
-    FETCHONE,
-    UPDATE
-} from "./actions.js";
-import {DepartmentBuilder} from "../builders/departmentBuilder.js";
-
+import { useNavigate } from "react-router-dom";
+import { AuthStatus } from "../authStatus.js";
 
 
 export const login = (credentials, cb) => {
@@ -29,7 +20,7 @@ export const login = (credentials, cb) => {
         .then(_ => cb())
         .catch(error => {
             if (error.response && error.response.status === 401){
-                onUnauthorizedLoginAction();
+                onBadCredsLoginAction();
             }else{
                 onErrorAction(error.message)
             }
@@ -39,6 +30,7 @@ export const login = (credentials, cb) => {
 export const updateToken = () => {
 
     const authToken = localStorage.getItem('authToken')
+    if (!authToken) onUnauthorizedLoginAction();
     axios({
         method: 'post',
         crossDomain: true,
@@ -64,18 +56,21 @@ const onErrorAction = (message) => {
 }
 
 const onUpdateToken = (token) => {
-
     localStorage.setItem('authToken', token)
 
 };
 
 const onUnauthorizedLoginAction = () => {
-    alert("Bad credentials");
+    const loginEndpoint = "/login";
+    if(window.location.pathname != loginEndpoint)
+    window.location = (`${loginEndpoint}?status=${AuthStatus.UNAUTHORIZED}`);
+}
+
+const onBadCredsLoginAction = () => {
+    window.location = (`/login?status=${AuthStatus.BAD_CREDENTIALS}`);
 }
 
 const onInvalidTokenAction = () => {
     localStorage.removeItem('authToken')
-    window.location = ('/login');
-    alert("Время жизни сессии истекло. Авторизируйтесь заново");
-
+    window.location = (`/login?status=${AuthStatus.SESSION_DEAD}`);
 }

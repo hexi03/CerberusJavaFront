@@ -1,4 +1,4 @@
- 
+
 import {useParams,useNavigate} from "react-router";
 
 import React, {useEffect} from 'react';
@@ -34,18 +34,18 @@ export const LeftMenu = () => {
         <div id="sidebar">
             <ul className="tree">
                 <li>
-                    <a href="">Управление пользователями и группами</a>
+                    Управление <a href="/UserGroup/user/index">пользователями</a> и <a href="/UserGroup/group/index">группами</a>
                 </li>
                 <li>
-                    <a href="">Реестр обьектов</a>
+                    <a href="/Registries/item/index">Реестр обьектов</a>
                 </li>
                 <li>
-                    <a href="">Реестр производственных издержек</a>
+                    <a href="/Registries/product/index">Реестр производственных издержек</a>
                 </li>
-
+                <hr/>
                 <li>
                     <details open>
-                        <summary><Link to="/Departments/index">Отделы</Link></summary>
+                        <summary><Link to="/Departments/index">Подразделения</Link></summary>
                         <ul>
                             {(Object.keys(departments)).map(departmentId => (
 
@@ -53,7 +53,7 @@ export const LeftMenu = () => {
 
                                     <details open>
                                         <summary>
-                                             <Link to={{pathname: "/Departments/details", search: `?id=${departments[departmentId].id}`}}>{departments[departmentId].name} </Link>
+                                             <Link to={{pathname: "/Departments/details", search: `?id=${departments[departmentId].id}`}}>{departments[departmentId].name.replace(/\s/g, '') ? departments[departmentId].name : "Без названия"}</Link>
                                         </summary>
                                         <ul>
                                             <li>
@@ -68,7 +68,7 @@ export const LeftMenu = () => {
                                                         {Object.keys(factorySites).filter((factorySiteId) => factorySites[factorySiteId].departmentId === departments[departmentId].id).map(factorySite_id => (
 
                                                             <li>
-                                                                <Link to={{pathname: "/FactorySites/details", search: `?id=${factorySites[factorySite_id].id}`}}>{factorySites[factorySite_id].name}</Link>
+                                                                <Link to={{pathname: "/FactorySites/details", search: `?id=${factorySites[factorySite_id].id}`}}>{factorySites[factorySite_id].name.replace(/\s/g, '') ? factorySites[factorySite_id].name : "Без названия"}</Link>
 
                                                             </li>
                                                         ))}
@@ -86,7 +86,7 @@ export const LeftMenu = () => {
                                                         {Object.keys(wareHouses).filter((wareHouseId) => wareHouses[wareHouseId].departmentId === departments[departmentId].id).map(wareHouse_id => (
 
                                                             <li>
-                                                                <Link to={{pathname: "/WareHouses/details", search: `?id=${wareHouses[wareHouse_id].id}`}}>{wareHouses[wareHouse_id].name}</Link>
+                                                                <Link to={{pathname: "/WareHouses/details", search: `?id=${wareHouses[wareHouse_id].id}`}}>{wareHouses[wareHouse_id].name ? wareHouses[wareHouse_id].name.replace(/\s/g, '') : "Без названия"}</Link>
 
                                                             </li>
                                                         ))}
