@@ -12,8 +12,9 @@ import {
 } from "./actions.js";
 import {DepartmentBuilder} from "../builders/departmentBuilder.js";
 import { updateToken } from "./authActions.js";
+import { debounceAction } from "../helpers/fetchHelpers.js";
 
-export const fetchAllDepartmentAction = () => {
+export const fetchAllDepartmentAction = debounceAction(() => {
     return async (dispatch) => {
         var authToken = localStorage.getItem('authToken')
         axios({
@@ -31,9 +32,9 @@ export const fetchAllDepartmentAction = () => {
             }).finally(_ => updateToken())
     };
 
-}
+})
 
-export const fetchOneDepartmentAction = (id) =>{
+export const fetchOneDepartmentAction = debounceAction((id) =>{
 return async (dispatch) => {
     var authToken = localStorage.getItem('authToken')
     axios({
@@ -58,7 +59,7 @@ return async (dispatch) => {
             }
         }).finally(_ => updateToken())
 }
-}
+})
 
 
 
@@ -80,7 +81,7 @@ return async (dispatch) => {
             name : department.name
         }
     })
-        .then(response => {department.id = response.data; dispatch(onCreateDepartmentAction(department))})
+        .then(response => {department.id = response.data.id; dispatch(onCreateDepartmentAction(department))})
             .catch(error => {
             dispatch(onErrorAction(error.message))
         }).finally(_ => updateToken())

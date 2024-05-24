@@ -14,8 +14,9 @@ import {
 import {WareHouseBuilder} from "../builders/wareHouseBuilder.js";
 import { WareHouseStateBuilder } from "../builders/wareHouseStateBuilder.js";
 import { updateToken } from "./authActions.js";
+import { debounceAction } from "../helpers/fetchHelpers.js";
 
-export const fetchAllWareHouseAction = () => {
+export const fetchAllWareHouseAction = debounceAction(() => {
     return async (dispatch) => {
         const authToken = localStorage.getItem('authToken')
         axios({
@@ -33,9 +34,9 @@ export const fetchAllWareHouseAction = () => {
             }).finally(_ => updateToken())
     };
 
-}
+})
 
-export const fetchOneWareHouseAction = (id) =>{
+export const fetchOneWareHouseAction = debounceAction((id) =>{
     return async (dispatch) => {
         const authToken = localStorage.getItem('authToken')
         axios({
@@ -60,7 +61,7 @@ export const fetchOneWareHouseAction = (id) =>{
                 }
             }).finally(_ => updateToken())
     }
-}
+})
 
 
 
@@ -83,7 +84,7 @@ return async (dispatch) => {
             name : wareHouse.name
         }
     })
-        .then(response => {wareHouse.id = response.data; dispatch(onCreateWareHouseAction(wareHouse))})
+        .then(response => {wareHouse.id = response.data.id; dispatch(onCreateWareHouseAction(wareHouse))})
             .catch(error => {
             dispatch(onErrorAction(error.message))
         }).finally(_ => updateToken())

@@ -2,6 +2,7 @@ import {API_URI, API_ORIGIN} from "../consts.js";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthStatus } from "../authStatus.js";
+import { debounceAction } from "../helpers/fetchHelpers.js";
 
 
 export const login = (credentials, cb) => {
@@ -27,7 +28,7 @@ export const login = (credentials, cb) => {
         })
 }
 
-export const updateToken = () => {
+export const updateToken = debounceAction(() => {
 
     const authToken = localStorage.getItem('authToken')
     if (!authToken) onUnauthorizedLoginAction();
@@ -49,7 +50,7 @@ export const updateToken = () => {
             }
         })
 
-}
+})
 
 const onErrorAction = (message) => {
     console.log(message);

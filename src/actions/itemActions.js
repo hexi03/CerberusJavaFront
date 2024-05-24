@@ -12,7 +12,8 @@ import {
 } from "./actions.js";
 import { ItemBuilder } from "../builders/itemBuilder.js";
 import { updateToken } from "./authActions.js";
-export const fetchAllItemsAction = () => {
+import { debounceAction } from "../helpers/fetchHelpers.js";
+export const fetchAllItemsAction = debounceAction(() => {
     return (dispatch) => {
         const authToken = localStorage.getItem('authToken');
         axios.get(API_URI + "/registry/fetchItem", {
@@ -28,9 +29,9 @@ export const fetchAllItemsAction = () => {
             dispatch(onErrorAction(error.message));
         }).finally(_ => updateToken());
     };
-}
+})
 
-export const fetchOneItemAction = (id) => {
+export const fetchOneItemAction = debounceAction((id) => {
     return (dispatch) => {
         const authToken = localStorage.getItem('authToken');
         axios.get(API_URI + "/registry/fetchItem", {
@@ -51,7 +52,7 @@ export const fetchOneItemAction = (id) => {
             dispatch(onErrorAction(error.message));
         }).finally(_ => updateToken());
     }
-}
+})
 
 export const createItemAction = (item) => {
     return (dispatch) => {
@@ -66,7 +67,7 @@ export const createItemAction = (item) => {
             }
         })
         .then(response => {
-            item.id = response.data;
+            item.id = response.data.id;
             dispatch(onCreateItemAction(item));
         })
         .catch(error => {

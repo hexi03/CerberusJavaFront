@@ -13,7 +13,8 @@ import {
 } from "./actions.js";
 import { UserBuilder } from "../builders/userBuilder.js";
 import { updateToken } from "./authActions.js";
-export const fetchAllUsersAction = () => {
+import { debounceAction } from "../helpers/fetchHelpers.js";
+export const fetchAllUsersAction = debounceAction(() => {
     return async (dispatch) => {
         const authToken = localStorage.getItem('authToken');
         axios.get(API_URI + "/usergroup/fetchUser", {
@@ -29,9 +30,9 @@ export const fetchAllUsersAction = () => {
             dispatch(onErrorAction(error.message));
         }).finally(_ => updateToken());
     };
-}
+})
 
-export const fetchOneUserAction = (id) => {
+export const fetchOneUserAction = debounceAction((id) => {
     return async (dispatch) => {
         const authToken = localStorage.getItem('authToken');
         axios.get(API_URI + "/usergroup/fetchUser", {
@@ -52,7 +53,7 @@ export const fetchOneUserAction = (id) => {
             dispatch(onErrorAction(error.message));
         }).finally(_ => updateToken());
     }
-}
+})
 
 export const createUserAction = (user) => {
     return async (dispatch) => {
@@ -69,7 +70,7 @@ export const createUserAction = (user) => {
             }
         })
         .then(response => {
-            user.id = response.data;
+            user.id = response.data.id;
             dispatch(onCreateUserAction(user));
         })
         .catch(error => {

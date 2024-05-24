@@ -15,8 +15,9 @@ import {
 import {FactorySiteBuilder} from "../builders/factorySiteBuilder.js";
 import { FactorySiteStateBuilder } from "../builders/factorySiteStateBuilder.js";
 import { updateToken } from "./authActions.js";
+import { debounceAction } from "../helpers/fetchHelpers.js";
 
-export const fetchAllFactorySiteAction = () => {
+export const fetchAllFactorySiteAction = debounceAction(() => {
     return async (dispatch) => {
         const authToken = localStorage.getItem('authToken')
         axios({
@@ -34,9 +35,9 @@ export const fetchAllFactorySiteAction = () => {
             }).finally(_ => updateToken())
     };
 
-}
+})
 
-export const fetchOneFactorySiteAction = (id) =>{
+export const fetchOneFactorySiteAction = debounceAction((id) =>{
         return async (dispatch) => {
             const authToken = localStorage.getItem('authToken')
             axios({
@@ -61,7 +62,7 @@ export const fetchOneFactorySiteAction = (id) =>{
                     }
                 }).finally(_ => updateToken())
         }
-}
+})
 
 
 
@@ -85,7 +86,7 @@ return async (dispatch) => {
             name : factorySite.name
         }
     })
-        .then(response => {factorySite.id = response.data; dispatch(onCreateFactorySiteAction(factorySite))})
+        .then(response => {factorySite.id = response.data.id; dispatch(onCreateFactorySiteAction(factorySite))})
             .catch(error => {
             dispatch(onErrorAction(error.message))
         }).finally(_ => updateToken())

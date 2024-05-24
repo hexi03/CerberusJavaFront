@@ -17,6 +17,7 @@ export const Login = (props) => {
 
   const onSuccessCb = () => {
         navigate("/");
+        window.location.reload()
     }
   const onButtonClick = () => {
     login({email : email, password : password}, onSuccessCb)

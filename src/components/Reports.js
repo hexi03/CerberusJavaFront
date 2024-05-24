@@ -51,7 +51,7 @@ const getFieldViewComponent = (field, store, report) => {
 
       case ReportFieldType.WAREHOUSE_LIST:
 
-        console.log("WAREHOUSE_SELECT");
+        console.log("WAREHOUSE_LIST");
 
         const whs = field.get(store, report);
         console.log(whs);
@@ -90,8 +90,8 @@ const getFieldViewComponent = (field, store, report) => {
                 </tr>
               </thead>
               <tbody>
-                  {Object.keys(list_entries).map((key) => {
-                      return (<tr><td>{list_entries[key].item.name}</td> <td>{list_entries[key].amount}</td></tr>)
+                  {list_entries.map((entry) => {
+                      return (<tr><td>{entry.item.name}</td> <td>{entry.amount}</td></tr>)
                   })}
               </tbody>
             </table>
@@ -120,8 +120,8 @@ const getFieldViewComponent = (field, store, report) => {
                 </tr>
               </thead>
               <tbody>
-                  {Object.keys(product_entries).map((key) => {
-                      return (<tr><td>{store.item.items[product_entries[key].product.producedItemId].name}</td> <td>{product_entries[key].amount}</td></tr>)
+                  {product_entries.map((entry) => {
+                      return (<tr><td>{store.item.items[entry.product.producedItemId].name}</td> <td>{entry.amount}</td></tr>)
                   })}
               </tbody>
             </table>
@@ -219,7 +219,7 @@ const ReportView = ({reportId }) => {
       reportDescriptions[report.type].fetch(report).forEach(dispatch);
     }
 
-  }, [report, dispatch]); // Выполняем только при изменении типа отчета
+  }, [report]); // Выполняем только при изменении типа отчета
 
 
   if (!report) return <NotFound/>
@@ -227,9 +227,15 @@ const ReportView = ({reportId }) => {
   return (
     <div>
       <h2>{'Details of: '}  {reportDescriptions[report.type].name}</h2>
+      <hr/>
       <h6>{reportId}</h6>
-
-
+      <hr/>
+        <LinkContainer to={{pathname: `/Reports/edit/`, search: `?id=${reportId}` }} key={reportId}>
+          <Button variant="primary">
+            Редактировать
+          </Button>
+        </LinkContainer>
+      <hr/>
         {Object.entries(reportDescriptions[report.type].fields).map(([fieldName, field]) => (
 
           <div key={fieldName}>
@@ -244,137 +250,353 @@ const ReportView = ({reportId }) => {
 
 
 
-const GetFieldEditComponent = ({ field, store, report, reportType, fieldName, isEditMode, defaultValue, params }) => {
-    const { register, control } = useFormContext();
+// const GetFieldEditComponent = ({ field, store, report, reportType, fieldName, isEditMode, defaultVal, params }) => {
+//
+//     const { register, control } = useFormContext();
+//     const { fields, append, remove } = useFieldArray({ control, name: fieldName });
+//
+//     const defaultValue = isEditMode ? reportDescriptions[report.type].fields[fieldName].get(store, report) : defaultVal
+//
+//     useEffect(()=>{
+//
+//       if (defaultValue && defaultValue.length){
+//         console.log("Clearing fields")
+//         //fields.forEach((item, index) => remove(index))
+//         console.log("AppendDefaultValue")
+//         console.log(defaultValue)
+//
+//         defaultValue.forEach((entry) => {console.log("field: "+ fieldName+" appended " + JSON.stringify(entry));console.log({wrapped: entry});append({wrapped: entry})})
+//       }
+//     }, [store])
+//
+//     switch (field.type) {
+//         case ReportFieldType.REP_SELECT:
+//             const repOptions = field.getVariants(store, params) || [];
+//             return (
+//                 <Form.Group>
+//                     <Form.Label>{field.label}</Form.Label>
+//                     <Form.Control as="select" {...register(fieldName)} value={defaultValue}>
+//                         {repOptions.map(rep => (
+//                             <option key={rep.id} value={rep.id}>{reportDescriptions[rep.type].name + " от " + new Date(rep.createdAt).toLocaleString()}</option>
+//                         ))}
+//                     </Form.Control>
+//                 </Form.Group>
+//             );
+//
+//         case ReportFieldType.WAREHOUSE_SELECT:
+//             const whOptions = field.getVariants(store, params) || [];
+//
+//
+//             return (
+//                 <Form.Group>
+//                     <Form.Label>{field.label}</Form.Label>
+//                     <Form.Control as="select" {...register(fieldName)} value={defaultValue}>
+//                         {whOptions.map(wh => (
+//                             <option key={wh.id} value={wh.id}>{wh.name}</option>
+//                         ))}
+//                     </Form.Control>
+//                 </Form.Group>
+//             );
+//
+//         case ReportFieldType.WAREHOUSE_LIST:
+//             const whListOptions = field.getVariants(store, params) || [];
+//             console.log("WAREHOUSE_LIST whListOptions inside")
+//             console.log(whListOptions)
+//             console.log("WAREHOUSE_LIST subfields inside")
+//             console.log(fields)
+//             return (
+//                 <Form.Group>
+//                     <Form.Label>{field.label}</Form.Label>
+//                     {fields.map((wrapper, index) => {
+//                       const item = wrapper.wrapped;
+//                       console.log("item : index");
+//                       console.log(item);
+//                       console.log(index);
+//                       if (item == undefined) return <></>
+//                       return (
+//
+//                         <div key={item.id} className="d-flex mb-2">
+//                             <Form.Control as="select" {...register(`${fieldName}[${index}]`)} value={item.id || ""}>
+//                                 {whListOptions.map(wh => (
+//                                     <option key={wh.id} value={wh.id}>{wh.name}</option>
+//                                 ))}
+//                             </Form.Control>
+//                             <Button variant="danger" onClick={() => remove(index)}>Remove</Button>
+//                         </div>
+//                     )})}
+//                     <Button variant="primary" onClick={() => append({wrapped: {}})}>Add Warehouse</Button>
+//                 </Form.Group>
+//             );
+//
+//         case ReportFieldType.ITEMS_LIST:
+//             const itemListOptions = field.getVariants(store, params) || [];
+//             console.log("ITEMS_LIST fields")
+//             console.log(fields)
+//             console.log("ITEMS_LIST itemListOptions")
+//             console.log(itemListOptions)
+//
+//
+//             return (
+//                 <Form.Group>
+//                     <Form.Label>{field.label}</Form.Label>
+//                     {fields.map((wrapper, index) => {
+//                       const item = wrapper.wrapped;
+//                       return (
+//                         <div key={item.id} className="d-flex mb-2">
+//                             <Form.Control as="select" {...register(`${fieldName}[${index}].id`)} value={item.item.id || ""}>
+//                                 {itemListOptions.map(option => (
+//                                     <option key={option.id} value={option.id}>{option.name}</option>
+//                                 ))}
+//                             </Form.Control>
+//                             <Form.Control
+//                                 type="number"
+//                                 placeholder="Amount"
+//                                 {...register(`${fieldName}[${index}].amount`)}
+//                                 defaultValue={item.amount || ""}
+//                                 className="ml-2"
+//                             />
+//                             <Button variant="danger" onClick={() => remove(index)}>Remove</Button>
+//                         </div>
+//                     )})}
+//                     <Button variant="primary" onClick={() => append({wrapped: { item: {id:""}, amount: "" }})}>Add Item</Button>
+//                 </Form.Group>
+//             );
+//
+//         case ReportFieldType.PRODUCTS_LIST:
+//             const productListOptions = field.getVariants(store, params) || [];
+//             console.log("PRODUCTS_LIST subfields inside")
+//             console.log(fields)
+//             return (
+//                 <Form.Group>
+//                     <Form.Label>{field.label}</Form.Label>
+//                     {fields.map((wrapper, index) => {
+//                       const item = wrapper.wrapped;
+//                       return (
+//                         <div key={item.id} className="d-flex mb-2">
+//                             <Form.Control as="select" {...register(`${fieldName}[${index}].id`)} value={item.item.id || ""}>
+//                                 {productListOptions.map(option => (
+//                                     <option key={option.id} value={option.id}>{option.name}</option>
+//                                 ))}
+//                             </Form.Control>
+//                             <Form.Control
+//                                 type="number"
+//                                 placeholder="Amount"
+//                                 {...register(`${fieldName}[${index}].amount`)}
+//                                 defaultValue={item.amount || ""}
+//                                 className="ml-2"
+//                             />
+//                             <Button variant="danger" onClick={() => remove(index)}>Remove</Button>
+//                         </div>
+//                     )})}
+//                     <Button variant="primary" onClick={() => append({wrapped: { item: {id:""}, amount: "" }})}>Add Product</Button>
+//                 </Form.Group>
+//             );
+//
+//         case ReportFieldType.DATETIME:
+//             return (
+//                 <Form.Group>
+//                     <Form.Label>{field.label}</Form.Label>
+//                     <Form.Control type="datetime-local" {...register(fieldName)} value={defaultValue} />
+//                 </Form.Group>
+//             );
+//
+//         case ReportFieldType.DELETED_DATETIME:
+//             return (
+//                 <Form.Group>
+//                     <Form.Label>{field.label}</Form.Label>
+//                     <Form.Control type="datetime-local" {...register(fieldName)} value={defaultValue} />
+//                 </Form.Group>
+//             );
+//
+//         // Добавьте другие типы полей по мере необходимости
+//         default:
+//             return <></>;
+//     }
+// };
+
+
+
+
+
+
+
+const RepSelect = ({ field, fieldName, defaultValue, store, params }) => {
+  const { register, control } = useFormContext();
+    const repOptions = field.getVariants(store, params) || [];
+    return (
+        <Form.Group>
+            <Form.Label>{field.label}</Form.Label>
+            <Form.Control as="select" {...register(fieldName)} value={defaultValue}>
+                {repOptions.map(rep => (
+                    <option key={rep.id} value={rep.id}>{reportDescriptions[rep.type].name + " от " + new Date(rep.createdAt).toLocaleString()}</option>
+                ))}
+            </Form.Control>
+        </Form.Group>
+    );
+};
+
+const WarehouseSelect = ({ field, fieldName, defaultValue, store, params }) => {
+  const { register, control } = useFormContext();
     const { fields, append, remove } = useFieldArray({ control, name: fieldName });
-    defaultValue = isEditMode ? reportDescriptions[reportType].fields[fieldName].get(store, report) : defaultValue;
+    const whOptions = field.getVariants(store, params) || [];
+    return (
+        <Form.Group>
+            <Form.Label>{field.label}</Form.Label>
+            <Form.Control as="select" {...register(fieldName)} value={defaultValue}>
+                {whOptions.map(wh => (
+                    <option key={wh.id} value={wh.id}>{wh.name}</option>
+                ))}
+            </Form.Control>
+        </Form.Group>
+    );
+};
 
-    switch (field.type) {
-        case ReportFieldType.REP_SELECT:
-            const repOptions = field.getVariants(store, params) || [];
-            return (
-                <Form.Group>
-                    <Form.Label>{field.label}</Form.Label>
-                    <Form.Control as="select" {...register(fieldName)} defaultValue={defaultValue}>
-                        {repOptions.map(rep => (
-                            <option key={rep.id} value={rep.id}>{reportDescriptions[rep.type].name + " от " + new Date(rep.createdAt).toLocaleString()}</option>
-                        ))}
-                    </Form.Control>
-                </Form.Group>
-            );
+const WarehouseList = ({ field, fieldName, defaultValue, store, params }) => {
+  const { register, control } = useFormContext();
+    const { fields, append, remove, replace } = useFieldArray({ control, name: fieldName });
+    useEffect(() => {
+        if (defaultValue && defaultValue.length) {
+            replace(defaultValue.map(entry => (entry.id)));
+        }
+    }, [defaultValue]);
 
-        case ReportFieldType.WAREHOUSE_SELECT:
-            const whOptions = field.getVariants(store, params) || [];
-            return (
-                <Form.Group>
-                    <Form.Label>{field.label}</Form.Label>
-                    <Form.Control as="select" {...register(fieldName)} defaultValue={defaultValue}>
-                        {whOptions.map(wh => (
-                            <option key={wh.id} value={wh.id}>{wh.name}</option>
-                        ))}
-                    </Form.Control>
-                </Form.Group>
-            );
+    const whListOptions = field.getVariants(store, params) || [];
+    return (
+        <Form.Group>
+            <Form.Label>{field.label}</Form.Label>
+            {fields.map((item, index) => {
+                console.log("шняга в форме")
+                console.log(item)
+                if (!item) return null;
+                return (
+                    <div key={item.id} className="d-flex mb-2">
+                        <Form.Control as="select" {...register(`${fieldName}[${index}]`)} defaultValue={item || ""}>
+                            {whListOptions.map(wh => (
+                                <option key={wh.id} value={wh.id}>{wh.name}</option>
+                            ))}
+                        </Form.Control>
+                        <Button variant="danger" onClick={() => remove(index)}>Remove</Button>
+                    </div>
+                );
+            })}
+            <Button variant="primary" onClick={() => append("")}>Add Warehouse</Button>
+        </Form.Group>
+    );
+};
 
-        case ReportFieldType.WAREHOUSE_LIST:
-            const whListOptions = field.getVariants(store, params) || [];
+const ItemsList = ({ field, fieldName, defaultValue, store, params }) => {
+  const { register, control } = useFormContext();
+    const { fields, append, remove, replace } = useFieldArray({ control, name: fieldName });
+    useEffect(() => {
+        if (defaultValue && defaultValue.length) {
+            console.log("replace!!!!!!!!!!!!1")
+            replace(defaultValue.map(entry => ({id: entry.item.id, amount: entry.amount})));
+        }
+    }, [defaultValue]);
 
-            return (
-                <Form.Group>
-                    <Form.Label>{field.label}</Form.Label>
-                    {fields.map((item, index) => (
-                        <div key={item.id} className="d-flex mb-2">
-                            <Form.Control as="select" {...register(`${fieldName}[${index}]`)} defaultValue={item.value || ""}>
-                                {whListOptions.map(wh => (
-                                    <option key={wh.id} value={wh.id}>{wh.name}</option>
-                                ))}
-                            </Form.Control>
-                            <Button variant="danger" onClick={() => remove(index)}>Remove</Button>
-                        </div>
-                    ))}
-                    <Button variant="primary" onClick={() => append({ value: "" })}>Add Warehouse</Button>
-                </Form.Group>
-            );
+    const itemListOptions = field.getVariants(store, params) || [];
+    return (
+        <Form.Group>
+            <Form.Label>{field.label}</Form.Label>
+            {fields.map((item, index) => {
+                console.log("шляпа в форме")
+                console.log(item)
+                return (
+                    <div key={item.id} className="d-flex mb-2">
+                        <Form.Control as="select" {...register(`${fieldName}[${index}].id`)} defaultValue={item.id || ""}>
+                            {itemListOptions.map(option => (
+                                <option key={option.id} value={option.id}>{option.name}</option>
+                            ))}
+                        </Form.Control>
+                        <Form.Control
+                            type="number"
+                            placeholder="Amount"
+                            {...register(`${fieldName}[${index}].amount`)}
+                            defaultValue={item.amount || ""}
+                            className="ml-2"
+                        />
+                        <Button variant="danger" onClick={() => remove(index)}>Remove</Button>
+                    </div>
+                );
+            })}
+            <Button variant="primary" onClick={() => append({  id: "", amount: ""  })}>Add Item</Button>
+        </Form.Group>
+    );
+};
 
-        case ReportFieldType.ITEMS_LIST:
-            const itemListOptions = field.getVariants(store, params) || [];
-            console.log("itemListOptions")
-            console.log(field.getVariants(store, params))
-            return (
-                <Form.Group>
-                    <Form.Label>{field.label}</Form.Label>
-                    {fields.map((item, index) => (
-                        <div key={item.id} className="d-flex mb-2">
-                            <Form.Control as="select" {...register(`${fieldName}[${index}].id`)} defaultValue={item.id || ""}>
-                                {itemListOptions.map(option => (
-                                    <option key={option.id} value={option.id}>{option.name}</option>
-                                ))}
-                            </Form.Control>
-                            <Form.Control
-                                type="number"
-                                placeholder="Amount"
-                                {...register(`${fieldName}[${index}].amount`)}
-                                defaultValue={item.amount || ""}
-                                className="ml-2"
-                            />
-                            <Button variant="danger" onClick={() => remove(index)}>Remove</Button>
-                        </div>
-                    ))}
-                    <Button variant="primary" onClick={() => append({ id: "", amount: "" })}>Add Item</Button>
-                </Form.Group>
-            );
+const ProductsList = ({ field, fieldName, defaultValue, store, params}) => {
+  const { register, control } = useFormContext();
+    const { fields, append, remove, replace } = useFieldArray({ control, name: fieldName });
+    useEffect(() => {
+        if (defaultValue && defaultValue.length) {
+            replace(defaultValue.map(entry => ({id: entry.item.id, amount: entry.amount})));
+        }
+    }, [defaultValue]);
 
-        case ReportFieldType.PRODUCTS_LIST:
-            const productListOptions = field.getVariants(store, params) || [];
+    const productListOptions = field.getVariants(store, params) || [];
+    return (
+        <Form.Group>
+            <Form.Label>{field.label}</Form.Label>
+            {fields.map((item, index) => {
+                return (
+                    <div key={item.id} className="d-flex mb-2">
+                        <Form.Control as="select" {...register(`${fieldName}[${index}].id`)} defaultValue={item.item.id || ""}>
+                            {productListOptions.map(option => (
+                                <option key={option.id} value={option.id}>{option.name}</option>
+                            ))}
+                        </Form.Control>
+                        <Form.Control
+                            type="number"
+                            placeholder="Amount"
+                            {...register(`${fieldName}[${index}].amount`)}
+                            defaultValue={item.amount || ""}
+                            className="ml-2"
+                        />
+                        <Button variant="danger" onClick={() => remove(index)}>Remove</Button>
+                    </div>
+                );
+            })}
+            <Button variant="primary" onClick={() => append({  id: "", amount: ""})}>Add Product</Button>
+        </Form.Group>
+    );
+};
 
-            return (
-                <Form.Group>
-                    <Form.Label>{field.label}</Form.Label>
-                    {fields.map((item, index) => (
-                        <div key={item.id} className="d-flex mb-2">
-                            <Form.Control as="select" {...register(`${fieldName}[${index}].id`)} defaultValue={item.id || ""}>
-                                {productListOptions.map(option => (
-                                    <option key={option.id} value={option.id}>{option.name}</option>
-                                ))}
-                            </Form.Control>
-                            <Form.Control
-                                type="number"
-                                placeholder="Amount"
-                                {...register(`${fieldName}[${index}].amount`)}
-                                defaultValue={item.amount || ""}
-                                className="ml-2"
-                            />
-                            <Button variant="danger" onClick={() => remove(index)}>Remove</Button>
-                        </div>
-                    ))}
-                    <Button variant="primary" onClick={() => append({ id: "", amount: "" })}>Add Product</Button>
-                </Form.Group>
-            );
-
-        case ReportFieldType.DATETIME:
-            return (
-                <Form.Group>
-                    <Form.Label>{field.label}</Form.Label>
-                    <Form.Control type="datetime-local" {...register(fieldName)} defaultValue={defaultValue} />
-                </Form.Group>
-            );
-
-        case ReportFieldType.DELETED_DATETIME:
-            return (
-                <Form.Group>
-                    <Form.Label>{field.label}</Form.Label>
-                    <Form.Control type="datetime-local" {...register(fieldName)} defaultValue={defaultValue} />
-                </Form.Group>
-            );
-
-        // Добавьте другие типы полей по мере необходимости
-        default:
-            return <></>;
-    }
+const DateTimeField = ({ field, fieldName, defaultValue }) => {
+  const { register, control } = useFormContext();
+    return (
+        <Form.Group>
+            <Form.Label>{field.label}</Form.Label>
+            <Form.Control type="datetime-local" {...register(fieldName)} value={defaultValue} />
+        </Form.Group>
+    );
 };
 
 
 
+
+const GetFieldEditComponent = ({ field, store, report, reportType, fieldName, isEditMode, defaultVal, params }) => {
+
+
+    const defaultValue = isEditMode ? reportDescriptions[report.type].fields[fieldName].get(store, report) : defaultVal;
+
+    switch (field.type) {
+        case ReportFieldType.REP_SELECT:
+            return <RepSelect field={field}  fieldName={fieldName} defaultValue={defaultValue} store={store} params={params} />;
+        case ReportFieldType.WAREHOUSE_SELECT:
+            return <WarehouseSelect field={field} fieldName={fieldName} defaultValue={defaultValue} store={store} params={params} />;
+        case ReportFieldType.WAREHOUSE_LIST:
+            return <WarehouseList field={field} fieldName={fieldName} defaultValue={defaultValue} store={store} params={params}  />;
+        case ReportFieldType.ITEMS_LIST:
+            return <ItemsList field={field}  fieldName={fieldName} defaultValue={defaultValue} store={store} params={params}  />;
+        case ReportFieldType.PRODUCTS_LIST:
+            return <ProductsList field={field}  fieldName={fieldName} defaultValue={defaultValue} store={store} params={params}  />;
+        case ReportFieldType.DATETIME:
+        case ReportFieldType.DELETED_DATETIME:
+            return <DateTimeField field={field} fieldName={fieldName} defaultValue={defaultValue} />;
+        default:
+            return <></>;
+    }
+};
 
 
 const ReportForm = ({ isEditMode, reportType, params}) => {
@@ -406,8 +628,23 @@ const ReportForm = ({ isEditMode, reportType, params}) => {
     wareHouseState: {states:wareHouseState}
   };
 
+
+  // const store = useSelector(state => ({
+  //   department: state.department || {},
+  //   factorySite: state.factorySite || {},
+  //   wareHouse: state.wareHouse || {},
+  //   item: state.item.items || {},
+  //   product:  state.product || {},
+  //   user: state.user || {},
+  //   group: state.group || {},
+  //   report: state.report || {},
+  //   factorySiteState: state.factorySiteState || {},
+  //   wareHouseState: state.wareHouseState || {}
+  // }));
   const reportId = params.get("id")
-  const report = useSelector(state => state.report.reports[reportId]);
+  console.log("reportId: ")
+  console.log(reportId)
+
 
   useEffect(() => {
     if (reportId && isEditMode) {
@@ -415,14 +652,18 @@ const ReportForm = ({ isEditMode, reportType, params}) => {
     }
   }, [reportId, isEditMode, dispatch]);
 
-  useEffect(() => {
-      if (isEditMode)
-        reportDescriptions[reportType].fetch(report).forEach(dispatch);
-      else
-        reportDescriptions[reportType].fetchCreate(report).forEach(dispatch);
-  }, [reportType, dispatch]);
 
-  const methods = useForm({ defaultValues: report || {} });
+  const report = useSelector(state => state.report.reports[reportId]);
+
+  useEffect(() => {
+      if (isEditMode){
+        if (report)
+          reportDescriptions[report.type].fetch(report).forEach(dispatch);
+      }else
+        reportDescriptions[reportType].fetchCreate(report).forEach(dispatch);
+  }, [reportType, report, dispatch]);
+
+  const methods = useForm({ defaultValues: {} });  //setting defaults
 
 
 
@@ -432,24 +673,25 @@ const ReportForm = ({ isEditMode, reportType, params}) => {
   const reportDescription = reportDescriptions[reportType];
 
   const onSubmit = (data) => {
+    console.log("data: ")
+    console.log(data)
     var builder = new ReportBuilder().setType(reportType);
     if (isEditMode) builder = builder.setId(reportId)
     builder = builder.setId(reportId)
     Object.keys(reportDescriptions[reportType].fields).forEach(fieldName => {
-      console.log("FIELD:")
-      console.log(fieldName)
 
       const fieldDescription = reportDescriptions[reportType].fields[fieldName];
 
       if (fieldDescription && fieldDescription.set) {
 
-        fieldDescription.set(builder, data[fieldName], params);
+        fieldDescription.set(builder, data[fieldName], report || {}, params);
       }
     });
     const reportData = builder.build();
 
     if (isEditMode) {
-      dispatch(updateReportAction(reportId, reportData));
+      reportData.id = report.id
+      dispatch(updateReportAction(reportData));
     } else {
       dispatch(createReportAction(reportData));
     }
@@ -475,7 +717,7 @@ const ReportForm = ({ isEditMode, reportType, params}) => {
                     fieldName = {fieldName}
                     reportType = {reportType}
                     isEditMode={isEditMode}
-                    defaultValue = {""}
+                    defaultVal = {""}
                     params = {params}
               />
             </div>
@@ -589,7 +831,7 @@ export const ReportManagementPanel = () => {
         case 'create':
             content = <ReportForm isEditMode = {false} reportType={reportType} params={queryParameters}/>;
             break;
-        case 'update':
+        case 'edit':
             content = <ReportForm isEditMode = {true} params={queryParameters}/>;
             break;
         case 'delete':

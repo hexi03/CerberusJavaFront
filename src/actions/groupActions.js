@@ -13,7 +13,8 @@ import {
 } from "./actions.js";
 import { GroupBuilder } from "../builders/groupBuilder.js";
 import { updateToken } from "./authActions.js";
-export const fetchAllGroupsAction = () => {
+import { debounceAction } from "../helpers/fetchHelpers.js";
+export const fetchAllGroupsAction = debounceAction(() => {
     return (dispatch) => {
         const authToken = localStorage.getItem('authToken');
         axios.get(API_URI + "/usergroup/fetchGroup", {
@@ -29,9 +30,9 @@ export const fetchAllGroupsAction = () => {
             dispatch(onErrorAction(error.message));
         }).finally(_ => updateToken());
     };
-}
+})
 
-export const fetchOneGroupAction = (id) => {
+export const fetchOneGroupAction = debounceAction((id) => {
     return (dispatch) => {
         const authToken = localStorage.getItem('authToken');
         axios.get(API_URI + "/usergroup/fetchGroup", {
@@ -52,7 +53,7 @@ export const fetchOneGroupAction = (id) => {
             dispatch(onErrorAction(error.message));
         }).finally(_ => updateToken());
     }
-}
+})
 
 export const createGroupAction = (group) => {
     return (dispatch) => {
@@ -66,7 +67,7 @@ export const createGroupAction = (group) => {
             }
         })
         .then(response => {
-            group.id = response.data;
+            group.id = response.data.id;
             dispatch(onCreateGroupAction(group));
         })
         .catch(error => {

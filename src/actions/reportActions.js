@@ -13,8 +13,9 @@ import {
 import {ReportBuilder} from "../builders/reportBuilder.js";
 import { ReportType } from "../builders/reportTypes.js";
 import { updateToken } from "./authActions.js";
+import { debounceAction } from "../helpers/fetchHelpers.js";
 
-export const fetchAllReportAction = () => {
+export const fetchAllReportAction = debounceAction(() => {
     return async (dispatch) => {
         const authToken = localStorage.getItem('authToken')
         axios({
@@ -32,10 +33,10 @@ export const fetchAllReportAction = () => {
             }).finally(_ => updateToken())
     };
 
-}
+})
 
 
-export const fetchAllReportActionByQuery = (reportQuery) => {
+export const fetchAllReportActionByQuery = debounceAction((reportQuery) => {
     return async (dispatch) => {
         const authToken = localStorage.getItem('authToken')
         axios({
@@ -56,9 +57,9 @@ export const fetchAllReportActionByQuery = (reportQuery) => {
             }).finally(_ => updateToken())
     };
 
-}
+})
 
-export const fetchOneReportAction = (id) =>{
+export const fetchOneReportAction = debounceAction((id) =>{
     console.log("fetchOneReportAction: " + id);
 return async (dispatch) => {
     const authToken = localStorage.getItem('authToken')
@@ -84,7 +85,7 @@ return async (dispatch) => {
             }
         }).finally(_ => updateToken())
 }
-}
+})
 
 
 
@@ -104,7 +105,7 @@ return async (dispatch) => {
         },
         data: report
     })
-        .then(response => {report.id = response.data; dispatch(onCreateReportAction(report))})
+        .then(response => {report.id = response.data.id; dispatch(onCreateReportAction(report))})
         .catch(error => {
             dispatch(onErrorAction(error.message))
         }).finally(_ => updateToken())

@@ -86,7 +86,7 @@ export const LeftMenu = () => {
                                                         {Object.keys(wareHouses).filter((wareHouseId) => wareHouses[wareHouseId].departmentId === departments[departmentId].id).map(wareHouse_id => (
 
                                                             <li>
-                                                                <Link to={{pathname: "/WareHouses/details", search: `?id=${wareHouses[wareHouse_id].id}`}}>{wareHouses[wareHouse_id].name ? wareHouses[wareHouse_id].name.replace(/\s/g, '') : "Без названия"}</Link>
+                                                                <Link to={{pathname: "/WareHouses/details", search: `?id=${wareHouses[wareHouse_id].id}`}}>{wareHouses[wareHouse_id].name.replace(/\s/g, '') ? wareHouses[wareHouse_id].name : "Без названия"}</Link>
 
                                                             </li>
                                                         ))}

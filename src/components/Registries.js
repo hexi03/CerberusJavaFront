@@ -215,7 +215,7 @@ export const RegistriesPanel = (props) => {
                 const requirements = Object.keys(product.requirementIds).map(key => ({ itemId: key, amount: product.requirementIds[key] }));
                 requirements.forEach(req => append(req));
             }
-        }, [product]);
+        }, [product.requirementIds]);
         console.log(product);
 
         if(!product) return (<></>)
