@@ -129,7 +129,7 @@ export const onFetchOneItemAction = (item) => ({
     scope: 'ITEM',
     action: FETCHONE,
     type: OK,
-    item: (new ItemBuilder()).setId(item.id).setName(item.name).setUnits(item.units).build()
+    item: (new ItemBuilder()).setId(item.id.id).setName(item.name).setUnits(item.units).build()
 });
 
 export const onFetchOneNotFoundItemAction = (id) => ({

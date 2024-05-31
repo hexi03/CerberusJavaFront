@@ -17,7 +17,7 @@ export const login = (credentials, cb) => {
             password : credentials.password
         }
     })
-        .then(response => onUpdateToken(response.data.token))
+        .then(response => {onUpdateToken(response.data.token); onUpdateLocalStorageUserId(response.data.userId.id)})
         .then(_ => cb())
         .catch(error => {
             if (error.response && error.response.status === 401){
@@ -58,6 +58,11 @@ const onErrorAction = (message) => {
 
 const onUpdateToken = (token) => {
     localStorage.setItem('authToken', token)
+
+};
+
+const onUpdateLocalStorageUserId = (id) => {
+    localStorage.setItem('userId', id)
 
 };
 

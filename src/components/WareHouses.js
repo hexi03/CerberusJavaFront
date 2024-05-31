@@ -16,6 +16,8 @@ import { Container, Form, Button, Row, Col, Accordion, Card, Pagination, Spinner
 import { fetchAllItemsAction } from "../actions/itemActions.js";
 import { ReportList, ReportSelector } from "./Reports.js";
 import { ReportType } from "../builders/reportTypes.js";
+import { ProblemType } from "../builders/problemTypes.js";
+import { WarningTypes } from "../builders/warningTypes.js";
 
 const itemsPerStorageListPage = 5;
 
@@ -242,9 +244,110 @@ const WareHouseState = (props) => {
     return <NotFound />;
   }
 
-  const renderProblems = () => {
-    if (!wareHouseState.problems || wareHouseState.problems.length === 0) {
-      return (<h4>Проблем не найдено</h4>);
+  const renderItemList = (list_entries, label) => {
+    console.log("list_entries")
+    console.log(list_entries)
+    return <>
+          <Accordion defaultActiveKey="0">
+        <Accordion.Item eventKey="0">
+          <Accordion.Header>{label}</Accordion.Header>
+          <Accordion.Body>
+          {Object.keys(list_entries).length > 0 ?
+                <Card>
+            <table>
+              <thead>
+                <tr>
+                    <th>Наименование</th>
+                    <th>Количество</th>
+                </tr>
+              </thead>
+              <tbody>
+                  {Object.keys(list_entries).map((key) => {
+                      return (<tr><td>{items[key]?.name}</td> <td>{list_entries[key]}</td></tr>)
+                  })}
+              </tbody>
+            </table>
+          </Card>
+          : "Ничего"}
+        </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
+    </>
+  }
+
+
+
+
+  const renderProblem = (pr) => {
+    console.log("Problem: ")
+    console.log(pr)
+
+      switch (pr.type){
+        case ProblemType.InvalidStorageStateProblem:
+          return (
+            <div>
+                <h6>Вычисление состояния из представленых отчетов приводит к невозможному результату. Рекомендуется проверить предоставленные отчеты.</h6>
+                {renderItemList(pr.invalidStorageStatePositions,"Список проблемных позиций")}
+            </div>
+
+          )
+        case ProblemType.InventarisationReportProblem:
+          return (
+            <div>
+                <h6>Вычисленное состояние не совпало со списком инвентаризованного из <Link to={{pathname: "/Reports/details", search: `?id=${pr.rep.id}`}}>ОТЧЕТА ОБ НИВЕНТАРИЗАЦИИ</Link>. Рекомендуется проверить отчет об инвентаризации и более ранние отчеты!</h6>
+                {renderItemList(pr.differrence,"Список проблемных позиций")}
+            </div>
+          )
+
+        case ProblemType.ReleasedTooMuchReportProblemDTO:
+          return (
+            <div>
+                <h6>Согласно <Link to={{pathname: "/Reports/details", search: `?id=${pr.rep.id}`}}>ОТЧЕТУ О СНАБЖЕНИИ</Link>  было отпущено больше расходных материалов, чем было запрошено. Рекомендуется проверить отчет о снабжении!</h6>
+                {renderItemList(pr.differrence,"Список проблемных позиций")}
+            </div>
+          )
+
+          case ProblemType.WorkShiftReplenishedTooMuchReportProblem:
+            return (
+              <div>
+                  <h6>Согласно  <Link to={{pathname: "/Reports/details", search: `?id=${pr.rep.id}`}}>ОТЧЕТУ О ПРИНЯТИИ РЕЗУЛЬТАТОВ СМЕНЫ</Link> на склад было принято больше, чем предоставлено (связано со {pr.by == "Produced" ? "списком ПП": "списком невостребованных РМ"}). Рекомендуется проверить отчет о принятии ПП/Невостребованных РМ!</h6>
+                  {renderItemList(pr.differrence,"Список проблемных позиций")}
+              </div>
+            )
+
+        default:
+          return <></>
+      }
+
+  };
+
+  const renderWarning = (warn) => {
+
+        console.log("Problem: ")
+    console.log(warn)
+
+      switch (warn.type){
+        case WarningTypes.UnsatisfiedSupplyRequirementReportWarning:
+            return (
+              <div>
+                  <h6>В системе присутствует <Link to={{pathname: "/Reports/details", search: `?id=${warn.rep.id}`}}>ОТЧЕТ О ЗАПРОСЕ СНАБЖЕНИЯ</Link>, включающий этот склад как целевой склад снабжения</h6>
+                  {renderItemList(warn.items,"Список проблемных позиций")}
+              </div>
+            )
+        case WarningTypes.UnsatisfiedWorkShiftReportWarning:
+            return (
+              <div>
+                  <h6>В системе присутствует <Link to={{pathname: "/Reports/details", search: `?id=${warn.rep.id}`}}>ОТЧЕТ ОБ ОКОНЧАНИИ РАБОЧЕЙ СМЕНЫ</Link>, включающий этот склад как целевой склад приемки ПП</h6>
+                  {renderItemList(warn.items,"Список проблемных позиций")}
+              </div>
+            )
+      }
+  }
+
+
+   const renderProblems = () => {
+     if (!wareHouseState.warnings || wareHouseState.warnings.length === 0) {
+      return (<h4>Ошибок не найдено</h4>);
     }
 
     return (
@@ -252,7 +355,7 @@ const WareHouseState = (props) => {
         <h3>Проблемы:</h3>
         <ul>
           {wareHouseState.problems.map((problem, index) => (
-            <li key={index}>{problem}</li>
+            <li key={index}>{renderProblem(problem)}</li>
           ))}
         </ul>
       </div>
@@ -261,7 +364,7 @@ const WareHouseState = (props) => {
 
   const renderWarnings = () => {
     if (!wareHouseState.warnings || wareHouseState.warnings.length === 0) {
-      return (<h4>Ошибок не найдено</h4>);
+      return (<h4>Предупреждений нет</h4>);
     }
 
     return (
@@ -269,12 +372,14 @@ const WareHouseState = (props) => {
         <h3>Предупреждения:</h3>
         <ul>
           {wareHouseState.warnings.map((warning, index) => (
-            <li key={index}>{warning}</li>
+            <li key={index}>{renderWarning(warning)}</li>
           ))}
         </ul>
       </div>
     );
   };
+
+
 
   const renderReports = () => {
 

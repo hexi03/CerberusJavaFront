@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm, useFieldArray } from 'react-hook-form';
 import {Link, useSearchParams} from "react-router-dom";
-import { Container, Form, Button, Row, Col, ListGroup, Table, Card} from 'react-bootstrap';
+import { Container, Form, Button, Row, Col, ListGroup, Table, Card, Accordion} from 'react-bootstrap';
 import { createUserAction, fetchOneUserAction, updateUserAction, deleteUserAction, fetchAllUsersAction } from '../actions/userActions.js';
 import { createGroupAction, fetchOneGroupAction, updateGroupAction, deleteGroupAction, fetchAllGroupsAction, updateGroupCompositionAction } from '../actions/groupActions.js';
 import { UserBuilder } from "../builders/userBuilder.js";
@@ -29,23 +29,24 @@ export const UserGroupManagementPanel = () => {
         return (
             <Form onSubmit={handleSubmit(onSubmit)}>
                 <Form.Group controlId="formBasicName">
-                    <Form.Label>Name</Form.Label>
+                    <Form.Label>Имя</Form.Label>
                     <Form.Control type="text" {...register('name')} />
                 </Form.Group>
 
                 <Form.Group controlId="email">
-                    <Form.Label>Email</Form.Label>
+                    <Form.Label>Эл. почта</Form.Label>
                     <Form.Control type="email" {...register('email')} />
                 </Form.Group>
 
                 <Form.Group controlId="formBasicPassword">
-                    <Form.Label>Password</Form.Label>
+                    <Form.Label>Пароль</Form.Label>
                     <Form.Control type="password" {...register('password')} />
                 </Form.Group>
 
 
 
-                <Button variant="primary" type="submit">Submit</Button>
+                <Button variant="primary" type="submit">Сохранить</Button>
+                <Button variant="secondary" onClick={() => navigate(-1)}>Обратно</Button>
             </Form>
         );
     };
@@ -73,24 +74,26 @@ export const UserGroupManagementPanel = () => {
             navigate(-1);
         };
 
+        if (!user) return <></>
         return (
             <Form onSubmit={handleSubmit(onSubmit)}>
                 <Form.Group controlId="formBasicName">
-                    <Form.Label>Name</Form.Label>
+                    <Form.Label>Имя</Form.Label>
                     <Form.Control type="text" {...register('name')} />
                 </Form.Group>
 
                 <Form.Group controlId="email">
-                    <Form.Label>Email</Form.Label>
+                    <Form.Label>Эл. почта</Form.Label>
                     <Form.Control type="email" {...register('email')} />
                 </Form.Group>
 
                 <Form.Group controlId="formBasicPassword">
-                    <Form.Label>Password</Form.Label>
+                    <Form.Label>Пароль</Form.Label>
                     <Form.Control type="password" {...register('password')} />
                 </Form.Group>
 
-                <Button variant="primary" type="submit">Submit</Button>
+                <Button variant="primary" type="submit">Сохранить</Button>
+                <Button variant="secondary" onClick={() => navigate(-1)}>Обратно</Button>
 
             </Form>
         );
@@ -106,23 +109,23 @@ export const UserGroupManagementPanel = () => {
         return (
             <Card>
                 <Card.Header>
-                    <h3>User List</h3>
-                    <Button variant="primary" href="/UserGroup/user/create">Create User</Button>
+                    <h3>Список поьзователей</h3>
+                    <Button variant="primary" href="/UserGroup/user/create">Создать пользователя</Button>
                 </Card.Header>
                 <Card.Body>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Actions</th>
+                                <th>Наименование</th>
+                                <th>Действия</th>
                             </tr>
                         </thead>
                         <tbody>
                             {Object.keys(users).map(key => (
                                 <tr key={key}>
-                                    <td>{users[key].name}</td>
+                                    <td><a href={`/UserGroup/user/details?id=${key}`}>{users[key].name}</a></td>
                                     <td>
-                                        <a href={`/UserGroup/user/update?id=${key}`}>Update</a> | <a href={`/UserGroup/user/details?id=${key}`}>Details</a> | <a href={`/UserGroup/user/delete?id=${key}`}>Delete</a>
+                                        <a href={`/UserGroup/user/update?id=${key}`}>Редактировать</a> | <a href={`/UserGroup/user/delete?id=${key}`}>Удалить</a>
                                     </td>
                                 </tr>
                             ))}
@@ -136,25 +139,35 @@ export const UserGroupManagementPanel = () => {
     const RenderUserDetails = () => {
         useEffect(() => {
             dispatch(fetchOneUserAction(id));
+            dispatch(fetchAllGroupsAction())
         }, [dispatch, id]);
 
         const user = useSelector(state => state.user.users[id]);
-        const groups = useSelector(state => state.group.groups[id]);
+        const groups = useSelector(state => state.group.groups);
+
+        if (!user) return <></>
 
         return user ? (
             <Card>
                 <Card.Header>
-                    <h3>User Details</h3>
+                    <h3>Детали пользователя</h3>
                 </Card.Header>
                 <Card.Body>
-                    <p><strong>Name:</strong> {user.name}</p>
-                    <p><strong>Groups:</strong></p>
-                    <ul>
+                    <p><strong>Имя:</strong> {user.name}</p>
+
+                    <Accordion defaultActiveKey="0">
+                        <Accordion.Item eventKey="0">
+                        <Accordion.Header>Группы</Accordion.Header>
+                        <Accordion.Body>
+                        <ul>
                         {user.groupIds && user.groupIds.length ? user.groupIds.map(groupId => (
-                            <li key={groupId}>{groups[groupId]?.name || "Loading..."}</li>
+                            <li key={groupId}>{groups[groupId]?.name}</li>
                         )) : "Ничего"}
-                    </ul>
-                    <Button variant="secondary" onClick={() => navigate(-1)}>Back</Button>
+                        </ul>
+                    </Accordion.Body>
+                </Accordion.Item>
+            </Accordion>
+                    <Button variant="secondary" onClick={() => navigate(-1)}>Обратно</Button>
 
                 </Card.Body>
             </Card>
@@ -172,16 +185,17 @@ export const UserGroupManagementPanel = () => {
             dispatch(deleteUserAction(id));
             navigate(-1);
         };
+        if (!user) return <></>
 
         return user ? (
             <Card>
                 <Card.Header>
-                    <h3>Delete User</h3>
+                    <h3>Удаление пользователя</h3>
                 </Card.Header>
                 <Card.Body>
-                    <p>Are you sure you want to delete <strong>{user.name}</strong>?</p>
-                    <Button variant="danger" onClick={handleDelete}>Delete</Button>
-                    <Button variant="secondary" onClick={() => navigate(-1)}>Cancel</Button>
+                    <p>Вы действительно хотите <b>удалить</b> пользователя <strong>{user.name}</strong>?</p>
+                    <Button variant="danger" onClick={handleDelete}>Удалить</Button>
+                    <Button variant="secondary" onClick={() => navigate(-1)}>Отмена</Button>
                 </Card.Body>
             </Card>
         ) : <p>Loading...</p>;
@@ -203,10 +217,10 @@ export const UserGroupManagementPanel = () => {
         return (
             <Form onSubmit={handleSubmit(onSubmit)}>
                 <Form.Group controlId="formBasicName">
-                    <Form.Label>Name</Form.Label>
+                    <Form.Label>Наименование</Form.Label>
                     <Form.Control type="text" {...register('name')} />
                 </Form.Group>
-                <Button variant="primary" type="submit">Submit</Button>
+                <Button variant="primary" type="submit">Сохранить</Button>
             </Form>
         );
     };
@@ -233,13 +247,15 @@ export const UserGroupManagementPanel = () => {
             navigate(-1);
         };
 
+        if (!group) return <p>Loading...</p>
+
         return (
             <Form onSubmit={handleSubmit(onSubmit)}>
                 <Form.Group controlId="formBasicName">
-                    <Form.Label>Name</Form.Label>
+                    <Form.Label>Наименование</Form.Label>
                     <Form.Control type="text" {...register('name')} />
                 </Form.Group>
-                <Button variant="primary" type="submit">Submit</Button>
+                <Button variant="primary" type="submit">Сохранить</Button>
             </Form>
         );
     };
@@ -254,23 +270,24 @@ export const UserGroupManagementPanel = () => {
         return (
             <Card>
                 <Card.Header>
-                    <h3>Group List</h3>
-                    <Button variant="primary" href="/UserGroup/group/create">Create Group</Button>
+                    <h3>Список групп</h3>
+                    <Button variant="primary" href="/UserGroup/group/create">Создать группу</Button>
                 </Card.Header>
                 <Card.Body>
                     <Table striped bordered hover>
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Actions</th>
+                                <th>Наименование</th>
+                                <th>Действия</th>
                             </tr>
                         </thead>
                         <tbody>
                             {Object.keys(groups).map(key => (
                                 <tr key={key}>
-                                    <td>{groups[key].name}</td>
+
+                                    <td><a href={`/UserGroup/group/details?id=${key}`}>{groups[key].name}</a></td>
                                     <td>
-                                        <a href={`/UserGroup/group/update?id=${key}`}>Update</a> | <a href={`/UserGroup/group/updateComposition?id=${key}`}>Update composition</a> | <a href={`/UserGroup/group/details?id=${key}`}>Details</a> | <a href={`/UserGroup/group/delete?id=${key}`}>Delete</a>
+                                        <a href={`/UserGroup/group/update?id=${key}`}>Редактировать</a> | <a href={`/UserGroup/group/updateComposition?id=${key}`}>Редактировать состав</a> | <a href={`/UserGroup/group/delete?id=${key}`}>Удалить</a>
                                     </td>
                                 </tr>
                             ))}
@@ -288,15 +305,14 @@ export const UserGroupManagementPanel = () => {
         }, [dispatch, id]);
 
         const group = useSelector(state => state.group.groups[id]);
-
         return group ? (
             <Card>
                 <Card.Header>
-                    <h3>Group Details</h3>
+                    <h3>Детали группы</h3>
                 </Card.Header>
                 <Card.Body>
                     <p><strong>Name:</strong> {group.name}</p>
-                    <Button variant="secondary" onClick={() => navigate(-1)}>Back</Button>
+                    <Button variant="secondary" onClick={() => navigate(-1)}>Обратно</Button>
                 </Card.Body>
             </Card>
         ) : <p>Loading...</p>;
@@ -314,15 +330,16 @@ export const UserGroupManagementPanel = () => {
             navigate(-1);
         };
 
+
         return group ? (
             <Card>
                 <Card.Header>
-                    <h3>Delete Group</h3>
+                    <h3>Удалить группу</h3>
                 </Card.Header>
                 <Card.Body>
-                    <p>Are you sure you want to delete <strong>{group.name}</strong>?</p>
+                    <p>Вы уверены, что хотите <b>удалить</b> <strong>{group.name}</strong>?</p>
                     <Button variant="danger" onClick={handleDelete}>Delete</Button>
-                    <Button variant="secondary" onClick={() => navigate(-1)}>Cancel</Button>
+                    <Button variant="secondary" onClick={() => navigate(-1)}>Отмена</Button>
                 </Card.Body>
             </Card>
         ) : <p>Loading...</p>;
@@ -358,24 +375,26 @@ export const UserGroupManagementPanel = () => {
             navigate(-1);
         };
 
+        if (!group) return <></>
         return (
             <Form onSubmit={handleSubmit(onSubmit)}>
                 <Form.Group controlId="formUsers">
-                    <Form.Label>Users</Form.Label>
+                    <Form.Label>Пользователи</Form.Label>
                     {fields.map((field, index) => (
                         <div key={field.id} className="d-flex mb-2">
                             <Form.Control as="select" {...register(`users.${index}.id`)}>
-                                <option value="">Select User</option>
+                                <option value="">Выбрать пользователя</option>
                                 {Object.keys(users).map(key => (
                                     <option key={key} value={key}>{users[key].name}</option>
                                 ))}
                             </Form.Control>
-                            <Button variant="danger" onClick={() => remove(index)}>Remove</Button>
+                            <Button variant="danger" onClick={() => remove(index)}>Удалить</Button>
                         </div>
                     ))}
-                    <Button variant="secondary" onClick={() => append({ id: "" })}>Add User</Button>
+                    <Button variant="secondary" onClick={() => append({ id: "" })}>Добавить пользователя</Button>
                 </Form.Group>
-                <Button variant="primary" type="submit">Submit</Button>
+                <Button variant="primary" type="submit">Сохранить</Button>
+                <Button variant="secondary" onClick={() => navigate(-1)}>Обратно</Button>
             </Form>
         );
     };

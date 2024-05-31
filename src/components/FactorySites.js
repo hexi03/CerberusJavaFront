@@ -19,6 +19,9 @@ import {FactorySiteBuilder} from "../builders/factorySiteBuilder.js";
 import {FactorySiteSupplyBuilder} from "../builders/factorySiteSupplyBuilder.js";
 import { ReportType } from "../builders/reportTypes.js";
 import { ReportList, ReportSelector } from "./Reports.js";
+import { ProblemType } from "../builders/problemTypes.js";
+import { WarningTypes } from "../builders/warningTypes.js";
+import { fetchAllItemsAction } from "../actions/itemActions.js";
 
 
 
@@ -223,26 +226,122 @@ const Details = (props) => {
 
 const FactorySiteState = (props) => {
   const dispatch = useDispatch();
+
   const factorySiteId = props.id;
 
   useEffect(() => {
     dispatch(fetchOneFactorySiteStateAction(factorySiteId));
+    dispatch(fetchAllItemsAction());
   }, [dispatch, factorySiteId]);
 
   const factorySiteState = useSelector(state => state.factorySiteState.states[factorySiteId]);
+  const items = useSelector(state => state.item.items);
 
   if (!factorySiteState) {
     return <NotFound />;
   }
 
-  const renderProblems = () => {
+
+  const renderItemList = (list_entries, label) => {
+    console.log("list_entries")
+    console.log(list_entries)
+    return <>
+          <Accordion defaultActiveKey="0">
+        <Accordion.Item eventKey="0">
+          <Accordion.Header>{label}</Accordion.Header>
+          <Accordion.Body>
+          {Object.keys(list_entries).length > 0 ?
+                <Card>
+            <table>
+              <thead>
+                <tr>
+                    <th>Наименование</th>
+                    <th>Количество</th>
+                </tr>
+              </thead>
+              <tbody>
+                  {Object.keys(list_entries).map((key) => {
+                      return (<tr><td>{items[key]?.name}</td> <td>{list_entries[key]}</td></tr>)
+                  })}
+              </tbody>
+            </table>
+          </Card>
+          : "Ничего"}
+        </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
+
+    </>
+  }
+
+
+
+
+  const renderProblem = (pr) => {
+    console.log("Problem: ")
+    console.log(pr)
+
+    //, связанная с <Link to={{pathname: "/Reports/details", search: `?id=${pr.rep.id}`}}>РАБОЧЕЙ СМЕНОЙ</Link>
+    //, связанная с <Link to={{pathname: "/Reports/details", search: `?id=${pr.rep.id}`}}>РАБОЧЕЙ СМЕНОЙ</Link>
+
+      switch (pr.type){
+        case ProblemType.WorkShiftConsumablesLossProblem:
+          return (
+            <div>
+                <h6>Исходя из предоставленных отчетов была выявлена потеря РМ. Рекомендуется проверить отчет о рабочей смене и ранее предоставленные отчеты!</h6>
+                {renderItemList(pr.lostedOnSiteConsumables,"Список проблемных позиций")}
+            </div>
+          )
+         case ProblemType.WorkShiftConsumablesTooMuchProblem:
+          return (
+            <div>
+                <h6>Исходя из предоставленных отчетов была выявлена невозможная ситуация (переучет произведенной продукции/невостребованных РМ). Рекомендуется проверить отчет о рабочей смене и ранее предоставленные отчеты!</h6>
+                {renderItemList(pr.lostedOnSiteConsumablesNeg,"Список проблемных позиций")}
+            </div>
+          )
+
+        default:
+          return <></>
+      }
+
+  };
+
+  const renderWarning = (warn) => {
+
+        console.log("Problem: ")
+    console.log(warn)
+
+      switch (warn.type){
+        case WarningTypes.WorkShiftLossesWarning:
+          return (
+              <div>
+                  <h6>Согласно <Link to={{pathname: "/Reports/details", search: `?id=${warn.rep.id}`}}>ОТЧЕТУ О РАБОЧЕЙ СМЕНЕ</Link> имеются потери РМ</h6>
+                  {renderItemList(warn.losses,"Список проблемных позиций")}
+              </div>
+            )
+
+        case WarningTypes.WorkShiftRemainsWarning:
+          return (
+              <div>
+                  <h6>Согласно <Link to={{pathname: "/Reports/details", search: `?id=${warn.rep.id}`}}>ОТЧЕТУ О РАБОЧЕЙ СМЕНЕ</Link> имеются остатки РМ на территории ПУ</h6>
+                  {renderItemList(warn.remains,"Список проблемных позиций")}
+              </div>
+            )
+      }
+  }
+
+
+   const renderProblems = () => {
+     if (!factorySiteState.warnings || factorySiteState.warnings.length === 0) {
+      return (<h4>Ошибок не найдено</h4>);
+    }
 
     return (
       <div>
         <h3>Проблемы:</h3>
         <ul>
           {factorySiteState.problems.map((problem, index) => (
-            <li key={index}>{problem}</li>
+            <li key={index}>{renderProblem(problem)}</li>
           ))}
         </ul>
       </div>
@@ -251,7 +350,7 @@ const FactorySiteState = (props) => {
 
   const renderWarnings = () => {
     if (!factorySiteState.warnings || factorySiteState.warnings.length === 0) {
-      return (<h4>Ошибок не найдено</h4>);
+      return (<h4>Предупреждений нет</h4>);
     }
 
     return (
@@ -259,12 +358,14 @@ const FactorySiteState = (props) => {
         <h3>Предупреждения:</h3>
         <ul>
           {factorySiteState.warnings.map((warning, index) => (
-            <li key={index}>{warning}</li>
+            <li key={index}>{renderWarning(warning)}</li>
           ))}
         </ul>
       </div>
     );
   };
+
+
 
   const renderReports = () => {
 
@@ -287,13 +388,14 @@ const FactorySiteState = (props) => {
     );
   };
 
-  return (
+  return (<>
     <Container className="mt-5">
       <h2>Состояние производственного участка</h2>
       {renderProblems()}
       {renderWarnings()}
       {renderReports()}
     </Container>
+      </>
   );
 };
 
@@ -361,7 +463,6 @@ function SupplyManage(props) {
 
   const factorySite = useSelector(state => state.factorySite.factorySites[factorySiteId]);
   const {wareHouses} = useSelector(state => {return state.wareHouse});
-  const inDepartmentWareHouses = Object.values(wareHouses).filter(wh => wareHouses[wh.id].departmentId == factorySite.departmentId)
 
 
   // Состояние для отслеживания выбранных поставщиков
@@ -371,11 +472,14 @@ function SupplyManage(props) {
   const [deSelectedWareHouses, setDeSelectedWareHouses] = useState([]);
 
   useEffect(() => {
-    console.log(selectedSuppliers);
-    console.log(wareHouses);
-    setSelectedWareHouses(inDepartmentWareHouses.filter((wh) => (selectedSuppliers.includes(wh.id))));
-    setDeSelectedWareHouses(inDepartmentWareHouses.filter((wh) => !(selectedSuppliers.includes(wh.id))));
-  }, [wareHouses, selectedSuppliers]);
+    if (factorySite){
+      const inDepartmentWareHouses = Object.values(wareHouses).filter(wh => wareHouses[wh.id]?.departmentId == factorySite.departmentId)
+      console.log(selectedSuppliers);
+      console.log(wareHouses);
+      setSelectedWareHouses(inDepartmentWareHouses.filter((wh) => (selectedSuppliers.includes(wh.id))));
+      setDeSelectedWareHouses(inDepartmentWareHouses.filter((wh) => !(selectedSuppliers.includes(wh.id))));
+    }
+  }, [setSelectedWareHouses, setDeSelectedWareHouses, wareHouses, factorySite, selectedSuppliers]);
 
     useEffect(() => {
     console.log("selectedWareHouses");

@@ -6,7 +6,7 @@ import React, {useEffect, useState} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useForm, useFieldArray } from 'react-hook-form';
 import {Link, useSearchParams} from "react-router-dom";
-import { Container, Form, Button, Row, Col, ListGroup, Modal, Table, Accordion } from 'react-bootstrap';
+import { Container, Form, Button, Row, Col, ListGroup, Modal, Table, Accordion, Card, CardHeader, CardBody } from 'react-bootstrap';
 
 import {ItemBuilder} from "../builders/itemBuilder.js";
 import {ProductBuilder} from "../builders/productBuilder.js";
@@ -68,6 +68,8 @@ export const RegistriesPanel = (props) => {
                 navigate(-1);
             };
 
+            if (!item) return <></>;
+
             return (
                 <Form onSubmit={handleSubmit(onSubmit)}>
                     <Form.Group controlId="formBasicName">
@@ -102,7 +104,7 @@ export const RegistriesPanel = (props) => {
                     <tbody>
                         {Object.keys(items).map(key => (
                             <tr key={key}>
-                                <td>{items[key].name}</td>
+                                <td><Link to={{pathname: "/Registries/item/details", search: `?id=${key}`}}>{items[key].name}</Link></td>
                                 <td>
                                     <Link to={{pathname: "/Registries/item/update", search: `?id=${key}`}}>Изменить</Link>
                                 </td>
@@ -114,6 +116,24 @@ export const RegistriesPanel = (props) => {
             );
         }
 
+
+
+        const RenderItemDetailsForm = () => {
+            const dispatch = useDispatch();
+            const navigate = useNavigate();
+
+            const item = useSelector(state => state.item.items[id]);
+
+            if (!item) return <></>;
+
+            return (
+                <Card>
+                        <CardHeader><b>Наименование: </b>{item.name}</CardHeader>
+                        <CardBody> </CardBody>
+                </Card>
+            );
+        };
+
         let content;
         switch (operation) {
             case 'create':
@@ -121,6 +141,9 @@ export const RegistriesPanel = (props) => {
                 break;
             case 'update':
                 content = <RenderItemUpdateForm/>;
+                break;
+            case 'details':
+                content = <RenderItemDetailsForm/>;
                 break;
             default:
                 content = <RenderItemList/>;
@@ -186,7 +209,7 @@ export const RegistriesPanel = (props) => {
     }
     const RenderProductUpdateForm = () => {
         const { register, handleSubmit, control, formState: { errors } } = useForm();
-        const { fields, append, remove } = useFieldArray({
+        const { fields, append, remove, replace } = useFieldArray({
             control,
             name: "requirements"
         });
@@ -213,9 +236,9 @@ export const RegistriesPanel = (props) => {
         useEffect(() => {
             if (product) {
                 const requirements = Object.keys(product.requirementIds).map(key => ({ itemId: key, amount: product.requirementIds[key] }));
-                requirements.forEach(req => append(req));
+                replace(requirements);
             }
-        }, [product.requirementIds]);
+        }, [product && product.requirementIds]);
         console.log(product);
 
         if(!product) return (<></>)
@@ -276,7 +299,7 @@ export const RegistriesPanel = (props) => {
                             { items && products && products[key] && products[key].producedItemId && items[products[key].producedItemId] ? <>
                             <tr key={products[key].id}>
 
-                                <td>{items[products[key].producedItemId].name}</td>
+                                <td><Link to={{pathname: "/Registries/product/details", search: `?id=${key}`}}>{items[products[key].producedItemId].name}</Link></td>
                                 <td>
                                     <Accordion>
                                         <Accordion.Item eventKey="0">
@@ -304,6 +327,45 @@ export const RegistriesPanel = (props) => {
         };
 
 
+        const RenderProductDetailsForm = () => {
+            const dispatch = useDispatch();
+            const navigate = useNavigate();
+
+            useEffect(() => {
+                dispatch(fetchOneProductAction(id));
+                dispatch(fetchAllItemsAction());
+            }, [dispatch, id]);
+
+            const product = useSelector(state => state.product.products[id]);
+            const items = useSelector(state => state.item.items);
+
+            if(!product) return (<></>)
+
+            return (
+                <Card>
+                        <CardHeader><b>Запись реестра издержек: </b>{product.id}</CardHeader>
+                        <CardBody>
+                        <h6><b>Наименование производимого предмета: </b><Link to={{pathname: "/Registries/item/details", search: `?id=${product.producedItemId}`}}>{items[product.producedItemId]?.name}</Link></h6>
+                        <b>Расходники: </b>
+                        <Accordion>
+                            <Accordion.Item eventKey="0">
+                                <Accordion.Header>Requirements</Accordion.Header>
+                                <Accordion.Body>
+                                    <ul>
+                                        {Object.keys(product.requirementIds).map(reqId => (
+                                            <li key={reqId}><Link to={{pathname: "/Registries/item/details", search: `?id=${reqId}`}}>{items[reqId]?.name}</Link> : {product.requirementIds[reqId]}</li>
+                                        ))}
+                                    </ul>
+                                </Accordion.Body>
+                            </Accordion.Item>
+                        </Accordion>
+                        </CardBody>
+
+                </Card>
+            );
+        };
+
+
 
         let content;
         switch (operation) {
@@ -313,6 +375,10 @@ export const RegistriesPanel = (props) => {
             case 'update':
                 content = <RenderProductUpdateForm/>;
                 break;
+            case 'details':
+                content = <RenderProductDetailsForm/>;
+                break;
+
             default:
                 content = <RenderProductList/>;
                 break;

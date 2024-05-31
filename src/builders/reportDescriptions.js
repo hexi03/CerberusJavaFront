@@ -10,7 +10,7 @@ import { reportFilter } from '../query/reportQuery.js';
 
 export const reportDescriptions = {
   [ReportType.WH_INVENTARISATION]: {
-    name: 'Warehouse Inventarisation Report',
+    name: 'Отчет об инвентаризации',
     fetch:  (report) => {
         return [
              fetchOneWareHouseAction(report.wareHouseId),
@@ -41,7 +41,7 @@ export const reportDescriptions = {
     }
   },
   [ReportType.WH_RELEASE]: {
-    name: 'Warehouse Release Report',
+    name: 'Отчет о снабжении',
     fetch:  (report) => {
       console.log("fetch called")
         return [
@@ -82,7 +82,7 @@ export const reportDescriptions = {
     }
   },
   [ReportType.WH_REPLENISHMENT]: {
-    name: 'Warehouse Replenishment Report',
+    name: 'Отчет о приемке',
     fetch:  (report) => {
         return [
              fetchOneWareHouseAction(report.wareHouseId),
@@ -113,7 +113,7 @@ export const reportDescriptions = {
     }
   },
   [ReportType.WH_WS_REPLENISHMENT]: {
-    name: 'Warehouse Workshift Replenishment Report',
+    name: 'Отчет о приемке результатов РС',
     fetch:  (report) => {
         return [
              fetchOneWareHouseAction(report.wareHouseId),
@@ -137,7 +137,7 @@ export const reportDescriptions = {
         getVariants: (store, params) => Object.values(store.wareHouse.wareHouses)
       },
       workShiftReportId: {
-        label: 'Отчет о рабочей смене',
+        label: 'Отчет о РС',
         type: ReportFieldType.REP_SELECT,
         get: (store, report) => store.report.reports[report.workShiftReportId],
         set: (builder, value, report, params) => builder.setWSReportId(value),
@@ -160,7 +160,7 @@ export const reportDescriptions = {
     }
   },
   [ReportType.WH_SHIPMENT]: {
-    name: 'Warehouse Shipment Report',
+    name: 'Отчет об отгрузке',
     fetch:  (report) => {
         return [
              fetchOneWareHouseAction(report.wareHouseId),
@@ -191,7 +191,7 @@ export const reportDescriptions = {
     }
   },
   [ReportType.FS_SUP_REQ]: {
-    name: 'Factory Site Supply Requirement Report',
+    name: 'Отчет о запросе снабжения',
     fetch:  (report) => {
         return [
              fetchOneFactorySiteAction(report.factorySiteId),
@@ -231,7 +231,7 @@ export const reportDescriptions = {
     }
   },
   [ReportType.FS_WORKSHIFT]: {
-    name: 'Factory Site Workshift Report',
+    name: 'Отчет о результатах РС',
     fetch:  (report) => {
         return [
              fetchOneFactorySiteAction(report.factorySiteId),
@@ -266,7 +266,7 @@ export const reportDescriptions = {
       produced: {
         label: 'Произведенное',
         type: ReportFieldType.PRODUCTS_LIST,
-        get: (store, report) => Object.keys(store.product.products).filter(key => Object.keys(report.produced).includes(key)).map((key) => ({item: store.item.items[store.product.products[key].producedItemId], amount: report.produced[key]})),
+        get: (store, report) => Object.keys(store.product.products).filter(key => Object.keys(report.produced).includes(key)).map((key) => ({item: store.item.items[store.product.products[key].producedItemId], amount: report.produced[key], productId: key})),
         set: (builder, value, report, params) => builder.setProducedItems(value.reduce((acc, val) => {acc[val.id] = val.amount; return acc;},{})),
         getVariants: (store, params) =>Object.values(store.product.products)
       },

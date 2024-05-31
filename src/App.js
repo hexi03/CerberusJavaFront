@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Navbar, Nav, Row, Col } from 'react-bootstrap';
 
@@ -14,8 +14,19 @@ import { RegistriesPanel } from './components/Registries.js';
 import { ReportManagementPanel } from './components/Reports.js';
 import { UserGroupManagementPanel } from './components/UserGroup.js';
 import { Login } from './components/login.js';
+import React, {useEffect, useState} from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchAllUsersAction } from './actions/userActions.js';
 
-const App = () => (
+const App = () => {
+    const dispatch = useDispatch();
+
+  useEffect(() => {
+    // Загружаем список отчетов при монтировании компонента
+    dispatch(fetchAllUsersAction());
+  }, [dispatch]);
+  const user = useSelector(state => state.user.users[localStorage.getItem('userId')])
+  return (
   <>
     <Navbar expand="sm" variant="dark" bg="dark">
       <div className="container-fluid">
@@ -23,7 +34,7 @@ const App = () => (
         <Navbar.Collapse id="navbarCollapse" className="d-sm-inline-flex justify-content-between">
           <Nav className="navbar-nav flex-grow-1">
             <Row>
-              <Col>{!localStorage.getItem('authToken') ? <Nav.Link href="/login">Login</Nav.Link> : <h5 className="text-light">Welcome</h5>}</Col>
+              <Col>{!localStorage.getItem('authToken') ? <Nav.Link href="/login">Вход</Nav.Link> : <p className="text-light">Добро пожловать, {user?.name}</p>}</Col>
             </Row>
           </Nav>
         </Navbar.Collapse>
@@ -47,6 +58,6 @@ const App = () => (
       </Router>
     </div>
   </>
-);
+)};
 
 export default App;
