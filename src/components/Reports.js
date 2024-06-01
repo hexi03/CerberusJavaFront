@@ -198,6 +198,13 @@ const ReportView = ({reportId }) => {
       wareHouseState: {states:wareHouseState}
   };
 
+  console.log("Рендер ReportView: ");
+  useEffect(() => {
+      console.log("Вызов useEffect c id: " + reportId);
+      if (reportId)
+      dispatch(fetchOneReportAction(reportId));
+
+  }, [reportId, dispatch]);
 
   const report = reports[reportId];
 
@@ -210,11 +217,7 @@ const ReportView = ({reportId }) => {
 
 
 
-  useEffect(() => {
-      if (reportId)
-      dispatch(fetchOneReportAction(reportId));
 
-  }, [reportId, dispatch]);
 
   useEffect(() => {
     console.log("fetch called effect")
@@ -384,7 +387,7 @@ const ProductsList = ({ field, fieldName, defaultValue, store, params}) => {
                     <div key={item.id} className="d-flex mb-2">
                         <Form.Control as="select" {...register(`${fieldName}[${index}].id`)} defaultValue={item.id || ""}>
                             {productListOptions.map(option => (
-                                <option key={option.id} value={option.id}>{option.name}</option>
+                                <option key={option.product.id} value={option.product.id}>{option.item.name}</option>
                             ))}
                         </Form.Control>
                         <Form.Control

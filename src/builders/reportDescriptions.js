@@ -268,7 +268,7 @@ export const reportDescriptions = {
         type: ReportFieldType.PRODUCTS_LIST,
         get: (store, report) => Object.keys(store.product.products).filter(key => Object.keys(report.produced).includes(key)).map((key) => ({item: store.item.items[store.product.products[key].producedItemId], amount: report.produced[key], productId: key})),
         set: (builder, value, report, params) => builder.setProducedItems(value.reduce((acc, val) => {acc[val.id] = val.amount; return acc;},{})),
-        getVariants: (store, params) =>Object.values(store.product.products)
+        getVariants: (store, params) => Object.values(store.product.products)?.map((key) => ({item: store.item.items[key.producedItemId], product: key}))
       },
       losses: {
         label: 'Потери',

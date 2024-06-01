@@ -332,7 +332,7 @@ const FactorySiteState = (props) => {
 
 
    const renderProblems = () => {
-     if (!factorySiteState.warnings || factorySiteState.warnings.length === 0) {
+     if (!factorySiteState.problems || factorySiteState.problems.length === 0) {
       return (<h4>Ошибок не найдено</h4>);
     }
 

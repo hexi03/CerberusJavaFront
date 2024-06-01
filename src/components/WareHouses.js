@@ -12,7 +12,7 @@ import {
 } from "../actions/wareHouseActions.js";
 import {WareHouseBuilder} from "../builders/wareHouseBuilder.js";
 
-import { Container, Form, Button, Row, Col, Accordion, Card, Pagination, Spinner, ListGroup } from 'react-bootstrap';
+import { Container, Form, Button, Row, Col, Accordion, Card, Pagination, Spinner, ListGroup, ListGroupItem } from 'react-bootstrap';
 import { fetchAllItemsAction } from "../actions/itemActions.js";
 import { ReportList, ReportSelector } from "./Reports.js";
 import { ReportType } from "../builders/reportTypes.js";
@@ -275,6 +275,29 @@ const WareHouseState = (props) => {
     </>
   }
 
+  const renderReportList = (reportIds, label) => {
+    console.log("reportIds")
+    console.log(reportIds)
+    return <>
+          <Accordion defaultActiveKey="0">
+        <Accordion.Item eventKey="0">
+          <Accordion.Header>{label}</Accordion.Header>
+          <Accordion.Body>
+          {reportIds.length > 0 ?
+                <Card>
+                  <ListGroup>
+                  {reportIds.map((repId) => {
+                      return (<ListGroupItem><Link to={{pathname: "/Reports/details", search: `?id=${repId.id}`}}>Отчет {repId.id}</Link></ListGroupItem>)
+                  })}
+                  </ListGroup>
+          </Card>
+          : "Ничего"}
+        </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
+    </>
+  }
+
 
 
 
@@ -294,7 +317,7 @@ const WareHouseState = (props) => {
         case ProblemType.InventarisationReportProblem:
           return (
             <div>
-                <h6>Вычисленное состояние не совпало со списком инвентаризованного из <Link to={{pathname: "/Reports/details", search: `?id=${pr.rep.id}`}}>ОТЧЕТА ОБ НИВЕНТАРИЗАЦИИ</Link>. Рекомендуется проверить отчет об инвентаризации и более ранние отчеты!</h6>
+                <h6>Вычисленное состояние не совпало со списком инвентаризованного из <Link to={{pathname: "/Reports/details", search: `?id=${pr.rep.id}`}}>ОТЧЕТА ОБ ИНВЕНТАРИЗАЦИИ</Link>. Рекомендуется проверить отчет об инвентаризации и более ранние отчеты!</h6>
                 {renderItemList(pr.differrence,"Список проблемных позиций")}
             </div>
           )
@@ -302,16 +325,18 @@ const WareHouseState = (props) => {
         case ProblemType.ReleasedTooMuchReportProblemDTO:
           return (
             <div>
-                <h6>Согласно <Link to={{pathname: "/Reports/details", search: `?id=${pr.rep.id}`}}>ОТЧЕТУ О СНАБЖЕНИИ</Link>  было отпущено больше расходных материалов, чем было запрошено. Рекомендуется проверить отчет о снабжении!</h6>
+                <h6>Согласно совокупности отчетов о снабжении для <Link to={{pathname: "/Reports/details", search: `?id=${pr.rep.id}`}}>ОТЧЕТА О ЗАПРОСЕ РМ</Link> было отпущено больше расходных материалов, чем было запрошено. Рекомендуется проверить отчет о снабжении!</h6>
                 {renderItemList(pr.differrence,"Список проблемных позиций")}
+                {renderReportList(pr.affectedReportIds,"Список связанных отчетов")}
             </div>
           )
 
           case ProblemType.WorkShiftReplenishedTooMuchReportProblem:
             return (
               <div>
-                  <h6>Согласно  <Link to={{pathname: "/Reports/details", search: `?id=${pr.rep.id}`}}>ОТЧЕТУ О ПРИНЯТИИ РЕЗУЛЬТАТОВ СМЕНЫ</Link> на склад было принято больше, чем предоставлено (связано со {pr.by == "Produced" ? "списком ПП": "списком невостребованных РМ"}). Рекомендуется проверить отчет о принятии ПП/Невостребованных РМ!</h6>
+                  <h6>Согласно совокупности отчетов о принятии ПП/Невостребованных РМ для <Link to={{pathname: "/Reports/details", search: `?id=${pr.rep.id}`}}>ОТЧЕТА О РАБОЧЕЙ СМЕНЕ</Link> на склад было принято больше, чем предоставлено (связано со {pr.by == "Produced" ? "списком ПП": "списком невостребованных РМ"}). Рекомендуется проверить отчет о принятии ПП/Невостребованных РМ!</h6>
                   {renderItemList(pr.differrence,"Список проблемных позиций")}
+                  {renderReportList(pr.affectedReportIds,"Список связанных отчетов")}
               </div>
             )
 
@@ -346,7 +371,7 @@ const WareHouseState = (props) => {
 
 
    const renderProblems = () => {
-     if (!wareHouseState.warnings || wareHouseState.warnings.length === 0) {
+     if (!wareHouseState.problems || wareHouseState.problems.length === 0) {
       return (<h4>Ошибок не найдено</h4>);
     }
 
