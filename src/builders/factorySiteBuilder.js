@@ -26,6 +26,8 @@ export class FactorySiteBuilder {
         return this;
     }
     build(){
+        console.log("this.suppliers")
+        console.log(this.suppliers)
         return {
             id: this.id,
             departmentId: this.departmentId,

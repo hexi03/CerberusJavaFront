@@ -264,14 +264,14 @@ const ReportView = ({reportId }) => {
 
 
 
-const RepSelect = ({ field, fieldName, defaultValue, store, params }) => {
+const RepSelect = ({ field, fieldName, defaultValue, store, params, options }) => {
   const { register, control } = useFormContext();
-    const repOptions = field.getVariants(store, params) || [];
+
     return (
         <Form.Group>
             <Form.Label>{field.label}</Form.Label>
             <Form.Control as="select" {...register(fieldName)} value={defaultValue}>
-                {repOptions.map(rep => (
+                {options.map(rep => (
                     <option key={rep.id} value={rep.id}>{reportDescriptions[rep.type].name + " от " + new Date(rep.createdAt).toLocaleString()}</option>
                 ))}
             </Form.Control>
@@ -279,15 +279,14 @@ const RepSelect = ({ field, fieldName, defaultValue, store, params }) => {
     );
 };
 
-const WarehouseSelect = ({ field, fieldName, defaultValue, store, params }) => {
+const WarehouseSelect = ({ field, fieldName, defaultValue, store, params, options  }) => {
   const { register, control } = useFormContext();
     const { fields, append, remove } = useFieldArray({ control, name: fieldName });
-    const whOptions = field.getVariants(store, params) || [];
     return (
         <Form.Group>
             <Form.Label>{field.label}</Form.Label>
             <Form.Control as="select" {...register(fieldName)} value={defaultValue}>
-                {whOptions.map(wh => (
+                {options.map(wh => (
                     <option key={wh.id} value={wh.id}>{wh.name}</option>
                 ))}
             </Form.Control>
@@ -295,7 +294,7 @@ const WarehouseSelect = ({ field, fieldName, defaultValue, store, params }) => {
     );
 };
 
-const WarehouseList = ({ field, fieldName, defaultValue, store, params }) => {
+const WarehouseList = ({ field, fieldName, defaultValue, store, params, options }) => {
   const { register, control } = useFormContext();
     const { fields, append, remove, replace } = useFieldArray({ control, name: fieldName });
     useEffect(() => {
@@ -304,7 +303,6 @@ const WarehouseList = ({ field, fieldName, defaultValue, store, params }) => {
         }
     }, [defaultValue]);
 
-    const whListOptions = field.getVariants(store, params) || [];
     return (
         <Form.Group>
             <Form.Label>{field.label}</Form.Label>
@@ -315,7 +313,7 @@ const WarehouseList = ({ field, fieldName, defaultValue, store, params }) => {
                 return (
                     <div key={item.id} className="d-flex mb-2">
                         <Form.Control as="select" {...register(`${fieldName}[${index}]`)} defaultValue={item || ""}>
-                            {whListOptions.map(wh => (
+                            {options.map(wh => (
                                 <option key={wh.id} value={wh.id}>{wh.name}</option>
                             ))}
                         </Form.Control>
@@ -328,7 +326,7 @@ const WarehouseList = ({ field, fieldName, defaultValue, store, params }) => {
     );
 };
 
-const ItemsList = ({ field, fieldName, defaultValue, store, params }) => {
+const ItemsList = ({ field, fieldName, defaultValue, store, params, options }) => {
   const { register, control } = useFormContext();
     const { fields, append, remove, replace } = useFieldArray({ control, name: fieldName });
     useEffect(() => {
@@ -338,7 +336,6 @@ const ItemsList = ({ field, fieldName, defaultValue, store, params }) => {
         }
     }, [defaultValue]);
 
-    const itemListOptions = field.getVariants(store, params) || [];
     return (
         <Form.Group>
             <Form.Label>{field.label}</Form.Label>
@@ -348,7 +345,7 @@ const ItemsList = ({ field, fieldName, defaultValue, store, params }) => {
                 return (
                     <div key={item.id} className="d-flex mb-2">
                         <Form.Control as="select" {...register(`${fieldName}[${index}].id`)} defaultValue={item.id || ""}>
-                            {itemListOptions.map(option => (
+                            {options.map(option => (
                                 <option key={option.id} value={option.id}>{option.name}</option>
                             ))}
                         </Form.Control>
@@ -368,7 +365,7 @@ const ItemsList = ({ field, fieldName, defaultValue, store, params }) => {
     );
 };
 
-const ProductsList = ({ field, fieldName, defaultValue, store, params}) => {
+const ProductsList = ({ field, fieldName, defaultValue, store, params, options}) => {
   const { register, control } = useFormContext();
     const { fields, append, remove, replace } = useFieldArray({ control, name: fieldName });
     useEffect(() => {
@@ -377,7 +374,6 @@ const ProductsList = ({ field, fieldName, defaultValue, store, params}) => {
         }
     }, [defaultValue]);
 
-    const productListOptions = field.getVariants(store, params) || [];
     return (
         <Form.Group>
             <Form.Label>{field.label}</Form.Label>
@@ -385,7 +381,7 @@ const ProductsList = ({ field, fieldName, defaultValue, store, params}) => {
                 return (
                     <div key={item.id} className="d-flex mb-2">
                         <Form.Control as="select" {...register(`${fieldName}[${index}].id`)} defaultValue={item.id || ""}>
-                            {productListOptions.map(option => (
+                            {options.map(option => (
                                 <option key={option.product.id} value={option.product.id}>{option.item.name}</option>
                             ))}
                         </Form.Control>
@@ -425,15 +421,15 @@ const GetFieldEditComponent = ({ field, store, report, reportType, fieldName, is
 
     switch (field.type) {
         case ReportFieldType.REP_SELECT:
-            return <RepSelect field={field}  fieldName={fieldName} defaultValue={defaultValue} store={store} params={params} />;
+            return <RepSelect field={field}  fieldName={fieldName} defaultValue={defaultValue} store={store} params={params} options={field.getVariants(store, report, params) || []} />;
         case ReportFieldType.WAREHOUSE_SELECT:
-            return <WarehouseSelect field={field} fieldName={fieldName} defaultValue={defaultValue} store={store} params={params} />;
+            return <WarehouseSelect field={field} fieldName={fieldName} defaultValue={defaultValue} store={store} params={params} options={field.getVariants(store, report, params) || []} />;
         case ReportFieldType.WAREHOUSE_LIST:
-            return <WarehouseList field={field} fieldName={fieldName} defaultValue={defaultValue} store={store} params={params}  />;
+            return <WarehouseList field={field} fieldName={fieldName} defaultValue={defaultValue} store={store} params={params} options={field.getVariants(store, report, params) || []}  />;
         case ReportFieldType.ITEMS_LIST:
-            return <ItemsList field={field}  fieldName={fieldName} defaultValue={defaultValue} store={store} params={params}  />;
+            return <ItemsList field={field}  fieldName={fieldName} defaultValue={defaultValue} store={store} params={params} options={field.getVariants(store, report, params) || []}  />;
         case ReportFieldType.PRODUCTS_LIST:
-            return <ProductsList field={field}  fieldName={fieldName} defaultValue={defaultValue} store={store} params={params}  />;
+            return <ProductsList field={field}  fieldName={fieldName} defaultValue={defaultValue} store={store} params={params} options={field.getVariants(store, report, params) || []}  />;
         case ReportFieldType.DATETIME:
         case ReportFieldType.DELETED_DATETIME:
             return <DateTimeField field={field} fieldName={fieldName} defaultValue={defaultValue} />;
