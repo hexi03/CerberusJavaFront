@@ -1,4 +1,4 @@
-import {CREATE, DELETE, ITEM, FETCHALL, FETCHNOTFOUND, FETCHONE, UPDATE} from "../actions/actions.js";
+import {CREATE, DELETE, FETCHALL, FETCHNOTFOUND, FETCHONE, ITEM, UPDATE} from "../actions/actions.js";
 
 const initialState = {
   items: {}

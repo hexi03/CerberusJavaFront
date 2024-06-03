@@ -1,21 +1,22 @@
-import {API_URI, API_ORIGIN} from "../consts.js";
+import {API_ORIGIN, API_URI} from "../consts.js";
 import axios from "axios";
 import {
     CREATE,
     DELETE,
     FACTORYSITE,
-    FETCHALL, OK,
+    FACTORYSITESTATE,
+    FETCHALL,
     FETCHNOTFOUND,
     FETCHONE,
+    OK,
     onErrorAction,
     UPDATE,
-    UPDATESUPPLY,
-    FACTORYSITESTATE
+    UPDATESUPPLY
 } from "./actions.js";
 import {FactorySiteBuilder} from "../builders/factorySiteBuilder.js";
-import { FactorySiteStateBuilder } from "../builders/factorySiteStateBuilder.js";
-import { updateToken } from "./authActions.js";
-import { debounceAction } from "../helpers/fetchHelpers.js";
+import {FactorySiteStateBuilder} from "../builders/factorySiteStateBuilder.js";
+import {updateToken} from "./authActions.js";
+import {debounceAction} from "../helpers/fetchHelpers.js";
 
 export const fetchAllFactorySiteAction = debounceAction(() => {
     return async (dispatch) => {

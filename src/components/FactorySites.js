@@ -1,28 +1,29 @@
 import {useNavigate, useParams} from "react-router";
 
 import React, {useEffect, useState} from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useForm } from 'react-hook-form';
+import {useDispatch, useSelector} from 'react-redux';
+import {useForm} from 'react-hook-form';
 import {Link, useSearchParams} from "react-router-dom";
-import { Container, Form, Button, Row, Col, Accordion, Card, ListGroup } from 'react-bootstrap';
+import {Accordion, Button, Card, Col, Container, Form, ListGroup, Row} from 'react-bootstrap';
 import {
-    createFactorySiteAction, deleteFactorySiteAction,
-    fetchAllFactorySiteAction, fetchOneFactorySiteAction, fetchOneFactorySiteStateAction,
-    updateFactorySiteAction, updateFactorySiteSupplyAction
+    createFactorySiteAction,
+    deleteFactorySiteAction,
+    fetchAllFactorySiteAction,
+    fetchOneFactorySiteAction,
+    fetchOneFactorySiteStateAction,
+    updateFactorySiteAction,
+    updateFactorySiteSupplyAction
 } from "../actions/factorySiteActions.js";
 
-import {
-    fetchAllWareHouseAction
-} from "../actions/wareHouseActions.js";
+import {fetchAllWareHouseAction} from "../actions/wareHouseActions.js";
 import {FactorySiteBuilder} from "../builders/factorySiteBuilder.js";
 
 import {FactorySiteSupplyBuilder} from "../builders/factorySiteSupplyBuilder.js";
-import { ReportType } from "../builders/reportTypes.js";
-import { ReportList, ReportSelector } from "./Reports.js";
-import { ProblemType } from "../builders/problemTypes.js";
-import { WarningTypes } from "../builders/warningTypes.js";
-import { fetchAllItemsAction } from "../actions/itemActions.js";
-
+import {ReportType} from "../builders/reportTypes.js";
+import {ReportList, ReportSelector} from "./Reports.js";
+import {ProblemType} from "../builders/problemTypes.js";
+import {WarningTypes} from "../builders/warningTypes.js";
+import {fetchAllItemsAction} from "../actions/itemActions.js";
 
 
 const NotFound = () => {

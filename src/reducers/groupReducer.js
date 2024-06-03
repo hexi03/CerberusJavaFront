@@ -1,4 +1,4 @@
-import {CREATE, DELETE, GROUP, FETCHALL, FETCHNOTFOUND, FETCHONE, UPDATE} from "../actions/actions.js";
+import {CREATE, DELETE, FETCHALL, FETCHNOTFOUND, FETCHONE, GROUP, UPDATE} from "../actions/actions.js";
 
 const initialState = {
   groups: {}

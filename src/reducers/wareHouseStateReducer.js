@@ -1,4 +1,4 @@
-import { FETCHNOTFOUND, FETCHONE, WAREHOUSESTATE } from "../actions/actions.js";
+import {FETCHNOTFOUND, FETCHONE, WAREHOUSESTATE} from "../actions/actions.js";
 
 const initialState = {
   states: {}

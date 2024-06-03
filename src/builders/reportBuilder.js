@@ -1,5 +1,6 @@
 import {ReportType} from "./reportTypes.js";
- export class ReportBuilder {
+
+export class ReportBuilder {
 
     constructor() {
     }

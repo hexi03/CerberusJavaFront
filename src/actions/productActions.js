@@ -1,18 +1,10 @@
-import { API_URI, API_ORIGIN } from "../consts.js";
+import {API_ORIGIN, API_URI} from "../consts.js";
 import axios from "axios";
-import {
-    CREATE,
-    DELETE,
-    FETCHALL,
-    FETCHNOTFOUND,
-    FETCHONE,
-    onErrorAction,
-    OK,
-    UPDATE
-} from "./actions.js";
-import { ProductBuilder } from "../builders/productBuilder.js";
-import { updateToken } from "./authActions.js";
-import { debounceAction } from "../helpers/fetchHelpers.js";
+import {CREATE, DELETE, FETCHALL, FETCHNOTFOUND, FETCHONE, OK, onErrorAction, UPDATE} from "./actions.js";
+import {ProductBuilder} from "../builders/productBuilder.js";
+import {updateToken} from "./authActions.js";
+import {debounceAction} from "../helpers/fetchHelpers.js";
+
 export const fetchAllProductAction = debounceAction(() => {
     return (dispatch) => {
         const authToken = localStorage.getItem('authToken');

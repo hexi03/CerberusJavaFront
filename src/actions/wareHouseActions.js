@@ -1,20 +1,21 @@
-import {API_URI, API_ORIGIN} from "../consts.js";
+import {API_ORIGIN, API_URI} from "../consts.js";
 import axios from "axios";
 import {
     CREATE,
     DELETE,
-    WAREHOUSE,
-    WAREHOUSESTATE,
-    FETCHALL, OK,
+    FETCHALL,
     FETCHNOTFOUND,
     FETCHONE,
+    OK,
     onErrorAction,
-    UPDATE
+    UPDATE,
+    WAREHOUSE,
+    WAREHOUSESTATE
 } from "./actions.js";
 import {WareHouseBuilder} from "../builders/wareHouseBuilder.js";
-import { WareHouseStateBuilder } from "../builders/wareHouseStateBuilder.js";
-import { updateToken } from "./authActions.js";
-import { debounceAction } from "../helpers/fetchHelpers.js";
+import {WareHouseStateBuilder} from "../builders/wareHouseStateBuilder.js";
+import {updateToken} from "./authActions.js";
+import {debounceAction} from "../helpers/fetchHelpers.js";
 
 export const fetchAllWareHouseAction = debounceAction(() => {
     return async (dispatch) => {

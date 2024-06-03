@@ -1,4 +1,4 @@
-import {CREATE, DELETE, REPORT, FETCHALL, FETCHNOTFOUND, FETCHONE, UPDATE} from "../actions/actions.js";
+import {CREATE, DELETE, FETCHALL, FETCHNOTFOUND, FETCHONE, REPORT, UPDATE} from "../actions/actions.js";
 
 const initialState = {
   reports: {}

@@ -1,5 +1,4 @@
-import { ReportType } from "../builders/reportTypes.js";
-
+import {ReportType} from "../builders/reportTypes.js";
 
 
 export const reportFilter = (queryParams, reports) => {

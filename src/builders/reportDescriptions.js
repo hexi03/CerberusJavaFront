@@ -1,12 +1,10 @@
- 
-import { ReportType, ReportFieldType  } from './reportTypes.js';
-import {  } from '../actions/departmentActions.js';
-import { fetchAllWareHouseAction, fetchOneWareHouseAction } from '../actions/wareHouseActions.js';
-import { fetchAllFactorySiteAction, fetchOneFactorySiteAction } from '../actions/factorySiteActions.js';
-import { fetchAllItemsAction } from '../actions/itemActions.js';
-import { fetchAllProductAction } from '../actions/productActions.js';
-import { fetchOneReportAction, fetchReportsByQuery } from '../actions/reportActions.js';
-import { reportFilter } from '../query/reportQuery.js';
+import {ReportFieldType, ReportType} from './reportTypes.js';
+import {fetchAllWareHouseAction, fetchOneWareHouseAction} from '../actions/wareHouseActions.js';
+import {fetchAllFactorySiteAction, fetchOneFactorySiteAction} from '../actions/factorySiteActions.js';
+import {fetchAllItemsAction} from '../actions/itemActions.js';
+import {fetchAllProductAction} from '../actions/productActions.js';
+import {fetchOneReportAction, fetchReportsByQuery} from '../actions/reportActions.js';
+import {reportFilter} from '../query/reportQuery.js';
 
 export const reportDescriptions = {
   [ReportType.WH_INVENTARISATION]: {

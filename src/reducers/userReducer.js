@@ -1,4 +1,4 @@
-import {CREATE, DELETE, USER, FETCHALL, FETCHNOTFOUND, FETCHONE, UPDATE} from "../actions/actions.js";
+import {CREATE, DELETE, FETCHALL, FETCHNOTFOUND, FETCHONE, UPDATE, USER} from "../actions/actions.js";
 
 const initialState = {
   users: {}

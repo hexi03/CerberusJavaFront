@@ -1,29 +1,28 @@
-
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Navbar, Nav, Row, Col } from 'react-bootstrap';
+import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
+import {Col, Nav, Navbar, Row} from 'react-bootstrap';
 
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import { Home } from "./components/Home.js";
-import { FactorySites } from "./components/FactorySites.js";
-import { Departments } from "./components/Departments.js";
-import { WareHouses } from "./components/WareHouses.js";
-import { LeftMenu } from './components/LeftMenu.js';
-import { RegistriesPanel } from './components/Registries.js';
-import { ReportManagementPanel } from './components/Reports.js';
-import { UserGroupManagementPanel } from './components/UserGroup.js';
-import { Login } from './components/login.js';
-import React, {useEffect, useState} from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchAllUsersAction } from './actions/userActions.js';
+import {Home} from "./components/Home.js";
+import {FactorySites} from "./components/FactorySites.js";
+import {Departments} from "./components/Departments.js";
+import {WareHouses} from "./components/WareHouses.js";
+import {LeftMenu} from './components/LeftMenu.js';
+import {RegistriesPanel} from './components/Registries.js';
+import {ReportManagementPanel} from './components/Reports.js';
+import {UserGroupManagementPanel} from './components/UserGroup.js';
+import {Login} from './components/login.js';
+import React, {useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {fetchOneUserAction} from './actions/userActions.js';
 
 const App = () => {
     const dispatch = useDispatch();
 
   useEffect(() => {
     // Загружаем список отчетов при монтировании компонента
-    dispatch(fetchAllUsersAction());
+    dispatch(fetchOneUserAction(localStorage.getItem('userId')));
   }, [dispatch]);
   const user = useSelector(state => state.user.users[localStorage.getItem('userId')])
   return (

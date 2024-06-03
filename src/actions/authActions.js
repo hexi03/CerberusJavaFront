@@ -1,8 +1,7 @@
-import {API_URI, API_ORIGIN} from "../consts.js";
+import {API_URI} from "../consts.js";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { AuthStatus } from "../authStatus.js";
-import { debounceAction } from "../helpers/fetchHelpers.js";
+import {AuthStatus} from "../authStatus.js";
+import {debounceAction} from "../helpers/fetchHelpers.js";
 
 
 export const login = (credentials, cb) => {

@@ -1,4 +1,13 @@
-import {CREATE, DELETE, FACTORYSITE, FETCHALL, FETCHNOTFOUND, FETCHONE, UPDATE, UPDATESUPPLY} from "../actions/actions.js";
+import {
+    CREATE,
+    DELETE,
+    FACTORYSITE,
+    FETCHALL,
+    FETCHNOTFOUND,
+    FETCHONE,
+    UPDATE,
+    UPDATESUPPLY
+} from "../actions/actions.js";
 
 const initialState = {
   factorySites: {}

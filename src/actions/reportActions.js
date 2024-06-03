@@ -1,19 +1,10 @@
-import {API_URI, API_ORIGIN} from "../consts.js";
+import {API_ORIGIN, API_URI} from "../consts.js";
 import axios from "axios";
-import {
-    CREATE,
-    DELETE,
-    REPORT,
-    FETCHALL, OK,
-    FETCHNOTFOUND,
-    FETCHONE,
-    onErrorAction,
-    UPDATE
-} from "./actions.js";
+import {CREATE, DELETE, FETCHALL, FETCHNOTFOUND, FETCHONE, OK, onErrorAction, REPORT, UPDATE} from "./actions.js";
 import {ReportBuilder} from "../builders/reportBuilder.js";
-import { ReportType } from "../builders/reportTypes.js";
-import { updateToken } from "./authActions.js";
-import { debounceAction } from "../helpers/fetchHelpers.js";
+import {ReportType} from "../builders/reportTypes.js";
+import {updateToken} from "./authActions.js";
+import {debounceAction} from "../helpers/fetchHelpers.js";
 
 export const fetchAllReportAction = debounceAction(() => {
     return async (dispatch) => {

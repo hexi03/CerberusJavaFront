@@ -1,20 +1,10 @@
-
-import {useParams,useNavigate} from "react-router";
-
 import React, {useEffect} from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useForm } from 'react-hook-form';
-import {Link, useSearchParams} from "react-router-dom";
+import {useDispatch, useSelector} from 'react-redux';
+import {Link} from "react-router-dom";
 
-import {
-    fetchAllDepartmentAction
-} from "../actions/departmentActions.js";
-import {
-    fetchAllFactorySiteAction
-} from "../actions/factorySiteActions.js";
-import {
-    fetchAllWareHouseAction
-} from "../actions/wareHouseActions.js";
+import {fetchAllDepartmentAction} from "../actions/departmentActions.js";
+import {fetchAllFactorySiteAction} from "../actions/factorySiteActions.js";
+import {fetchAllWareHouseAction} from "../actions/wareHouseActions.js";
 
 export const LeftMenu = () => {
     const dispatch = useDispatch();

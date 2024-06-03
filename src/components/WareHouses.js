@@ -1,23 +1,37 @@
 import {useNavigate, useParams} from "react-router";
 
 import React, {useEffect, useState} from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useForm } from 'react-hook-form';
+import {useDispatch, useSelector} from 'react-redux';
+import {useForm} from 'react-hook-form';
 import {Link, useSearchParams} from "react-router-dom";
 import {
-    createWareHouseAction, deleteWareHouseAction,
-    fetchAllWareHouseAction, fetchOneWareHouseAction,
+    createWareHouseAction,
+    deleteWareHouseAction,
+    fetchAllWareHouseAction,
+    fetchOneWareHouseAction,
     fetchOneWareHouseStateAction,
     updateWareHouseAction
 } from "../actions/wareHouseActions.js";
 import {WareHouseBuilder} from "../builders/wareHouseBuilder.js";
 
-import { Container, Form, Button, Row, Col, Accordion, Card, Pagination, Spinner, ListGroup, ListGroupItem } from 'react-bootstrap';
-import { fetchAllItemsAction } from "../actions/itemActions.js";
-import { ReportList, ReportSelector } from "./Reports.js";
-import { ReportType } from "../builders/reportTypes.js";
-import { ProblemType } from "../builders/problemTypes.js";
-import { WarningTypes } from "../builders/warningTypes.js";
+import {
+    Accordion,
+    Button,
+    Card,
+    Col,
+    Container,
+    Form,
+    ListGroup,
+    ListGroupItem,
+    Pagination,
+    Row,
+    Spinner
+} from 'react-bootstrap';
+import {fetchAllItemsAction} from "../actions/itemActions.js";
+import {ReportList, ReportSelector} from "./Reports.js";
+import {ReportType} from "../builders/reportTypes.js";
+import {ProblemType} from "../builders/problemTypes.js";
+import {WarningTypes} from "../builders/warningTypes.js";
 
 const itemsPerStorageListPage = 5;
 

@@ -1,6 +1,5 @@
 import {ASYNC, DEPARTMENT, onFetchDepartmentAction} from "../actions/departmentActions.js";
-import {put, call, takeEvery} from "redux-saga/effects"
-import {CREATE, DELETE, FETCHALL, FETCHONE, UPDATE} from "../actions/actions.js";
+import {call, put, takeEvery} from "redux-saga/effects"
 import {combineWorker} from "./saga.js";
 import {API_URI} from "../consts.js";
 import axios from "axios";

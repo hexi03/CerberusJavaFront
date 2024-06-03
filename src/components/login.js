@@ -1,8 +1,8 @@
-import {useNavigate, useParams} from "react-router";
-import { Form, Button, Container, Row, Col, Alert } from 'react-bootstrap';
-import React, {useEffect, useState} from 'react';
-import { login } from "../actions/authActions.js";
-import {Link, useSearchParams} from "react-router-dom";
+import {useNavigate} from "react-router";
+import {Button, Col, Container, Form, Row} from 'react-bootstrap';
+import React, {useState} from 'react';
+import {login} from "../actions/authActions.js";
+import {useSearchParams} from "react-router-dom";
 import {AuthStatus} from "../authStatus.js"
 
 

@@ -1,4 +1,4 @@
-import { API_URI, API_ORIGIN } from "../consts.js";
+import {API_ORIGIN, API_URI} from "../consts.js";
 import axios from "axios";
 import {
     CREATE,
@@ -6,14 +6,15 @@ import {
     FETCHALL,
     FETCHNOTFOUND,
     FETCHONE,
-    onErrorAction,
     OK,
+    onErrorAction,
     UPDATE,
     UPDATECOMPOSITION
 } from "./actions.js";
-import { GroupBuilder } from "../builders/groupBuilder.js";
-import { updateToken } from "./authActions.js";
-import { debounceAction } from "../helpers/fetchHelpers.js";
+import {GroupBuilder} from "../builders/groupBuilder.js";
+import {updateToken} from "./authActions.js";
+import {debounceAction} from "../helpers/fetchHelpers.js";
+
 export const fetchAllGroupsAction = debounceAction(() => {
     return (dispatch) => {
         const authToken = localStorage.getItem('authToken');

@@ -1,19 +1,22 @@
-
-
 import {useNavigate, useParams} from "react-router";
 
-import React, {useEffect, useState} from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useForm, useFieldArray } from 'react-hook-form';
+import React, {useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {useFieldArray, useForm} from 'react-hook-form';
 import {Link, useSearchParams} from "react-router-dom";
-import { Container, Form, Button, Row, Col, ListGroup, Modal, Table, Accordion, Card, CardHeader, CardBody } from 'react-bootstrap';
+import {Accordion, Button, Card, CardBody, CardHeader, Form, Table} from 'react-bootstrap';
 
 import {ItemBuilder} from "../builders/itemBuilder.js";
 import {ProductBuilder} from "../builders/productBuilder.js";
 
-import { createItemAction, fetchOneItemAction, updateItemAction, fetchAllItemsAction } from '../actions/itemActions.js';
+import {createItemAction, fetchAllItemsAction, fetchOneItemAction, updateItemAction} from '../actions/itemActions.js';
 
-import { createProductAction, fetchOneProductAction, updateProductAction, fetchAllProductAction } from '../actions/productActions.js';
+import {
+    createProductAction,
+    fetchAllProductAction,
+    fetchOneProductAction,
+    updateProductAction
+} from '../actions/productActions.js';
 
 export const RegistriesPanel = (props) => {
     const navigate = useNavigate();

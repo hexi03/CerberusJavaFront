@@ -1,22 +1,21 @@
 import {useNavigate, useParams} from "react-router";
-import { FormProvider, useForm, useFormContext, useFieldArray } from 'react-hook-form';
-import React, {useEffect, useState} from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import {FormProvider, useFieldArray, useForm, useFormContext} from 'react-hook-form';
+import React, {useEffect} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
 import {Link, useSearchParams} from "react-router-dom";
-import { LinkContainer } from 'react-router-bootstrap'
-import { Container, Form, Button, Row, Col, Card, ListGroup, ButtonGroup, Table, Accordion, CardHeader, CardBody, CardFooter} from 'react-bootstrap';
-import { createReportAction, fetchOneReportAction, updateReportAction, fetchAllReportsAction, fetchReportsByQuery } from '../actions/reportActions.js';
+import {LinkContainer} from 'react-router-bootstrap'
+import {Accordion, Button, ButtonGroup, Card, CardBody, CardFooter, CardHeader, Container, Form} from 'react-bootstrap';
+import {
+    createReportAction,
+    fetchOneReportAction,
+    fetchReportsByQuery,
+    updateReportAction
+} from '../actions/reportActions.js';
 import {ReportBuilder, ReportType} from '../builders/reportBuilder.js';
 import {reportDescriptions} from '../builders/reportDescriptions.js';
-import { ReportFieldType } from "../builders/reportTypes.js";
-import { reportFilter } from "../query/reportQuery.js";
-import { fetchAllUsersAction } from "../actions/userActions.js";
-
-
-
-
-
-
+import {ReportFieldType} from "../builders/reportTypes.js";
+import {reportFilter} from "../query/reportQuery.js";
+import {fetchAllUsersAction} from "../actions/userActions.js";
 
 
 const getFieldViewComponent = (field, store, report) => {
